@@ -38,17 +38,34 @@ export interface TMDBResponse<T> {
   total_results: number;
 }
 
+export interface GenreListResponse {
+  genres: { id: number; name: string }[];
+}
+
 // Now specific API functions — clean and fully typed
 export const getPopularMovies = (page = 1) =>
   fetchFromTMDB<TMDBResponse<Movie>>(`/movie/popular?page=${page}`);
 
-export const getTrendingMovies = () =>
-  fetchFromTMDB<TMDBResponse<Movie>>("/trending/movie/week");
+export const getTrendingMovies = (page = 1) =>
+  fetchFromTMDB<TMDBResponse<Movie>>(`/trending/movie/week?page=${page}`);
 
-export const searchMovies = (query: string, page = 1) =>
-  fetchFromTMDB<TMDBResponse<Movie>>(
-    `/search/movie?query=${encodeURIComponent(query)}&page=${page}`,
+export const searchMovies = (query: string, page = 1, genreId?: number) => {
+  const genreQuery =
+    genreId && Number.isFinite(genreId) && genreId > 0
+      ? `&with_genres=${genreId}`
+      : "";
+  return fetchFromTMDB<TMDBResponse<Movie>>(
+    `/search/movie?query=${encodeURIComponent(query)}&page=${page}${genreQuery}`,
   );
+};
+
+export const discoverMoviesByGenre = (genreId: number, page = 1) =>
+  fetchFromTMDB<TMDBResponse<Movie>>(
+    `/discover/movie?with_genres=${genreId}&page=${page}&sort_by=popularity.desc`,
+  );
+
+export const getMovieGenres = () =>
+  fetchFromTMDB<GenreListResponse>("/genre/movie/list");
 
 export const getMovieDetail = (id: number) =>
   fetchFromTMDB<MovieDetail>(`/movie/${id}`).then((movie) => ({
