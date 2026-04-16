@@ -38,6 +38,8 @@
 - `tmdb.ts` now handles query strings safely and provides clearer API errors.
 - Test stack added: Vitest + Testing Library (`npm run test:*` scripts).
 - CI/CD added in one workflow: quality gate then optional local deploy then cloud deploy.
+- Movie detail page now includes a local-only survey module with structured ratings and two freeform feedback fields.
+- Movie detail page now shows a seeded Audience Snapshot aggregate plus recent comment highlights for community context.
 
 ### UI Snapshot Gallery
 

@@ -11,6 +11,8 @@ Movie discovery app built with React, TypeScript, Vite, Tailwind, and TMDB API.
 - Browse trending movies from TMDB
 - Search movies with URL-synced query state
 - View movie details and manage watchlist
+- Submit structured movie survey feedback with ratings and freeform comments
+- View a seeded Audience Snapshot summary and recent comment highlights per movie
 - Register/login with mock auth flow
 - Protected routes for watchlist
 - Per-user watchlist persistence in localStorage

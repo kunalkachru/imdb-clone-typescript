@@ -1,8 +1,19 @@
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { getMovieDetail } from "../services/tmdb";
 import type { Movie, MovieDetail as MovieDetailType } from "../types/movie";
 import { useWatchlist } from "../hooks/useWatchlist";
+import { useAuth } from "../hooks/useAuth";
+import { getMovieSurvey } from "../services/survey";
+import type { MovieSurveyResponse } from "../types/survey";
+import MovieSurveyForm from "../components/survey/MovieSurveyForm";
+import MovieSurveySummary from "../components/survey/MovieSurveySummary";
+import AudienceSurveySnapshot from "../components/survey/AudienceSurveySnapshot";
+import {
+  buildAudienceSnapshotMetrics,
+  getAudienceCommentHighlights,
+} from "../services/surveyCommunity";
 
 const MovieDetail = () => {
   // TS LESSON: useParams returns Record<string, string | undefined>
@@ -10,6 +21,8 @@ const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const movieId = Number(id);
+  const { user } = useAuth();
+  const [isSurveyExpanded, setIsSurveyExpanded] = useState(false);
 
   // TS LESSON: consuming context — fully typed, no null checks needed
   const { dispatch, isInWatchlist } = useWatchlist();
@@ -28,6 +41,22 @@ const MovieDetail = () => {
       return getMovieDetail(movieId);
     },
     movieId, // re-fetch if id changes
+  );
+  const [surveyVersion, setSurveyVersion] = useState(0);
+  const survey = useMemo<MovieSurveyResponse | null>(() => {
+    if (!Number.isFinite(movieId) || movieId <= 0) {
+      return null;
+    }
+    void surveyVersion;
+    return getMovieSurvey(movieId, user?.id ?? null);
+  }, [movieId, user?.id, surveyVersion]);
+  const audienceMetrics = useMemo(
+    () => buildAudienceSnapshotMetrics(movieId, survey),
+    [movieId, survey],
+  );
+  const audienceComments = useMemo(
+    () => getAudienceCommentHighlights(movieId, survey),
+    [movieId, survey],
   );
 
   if (!Number.isFinite(movieId) || movieId <= 0) {
@@ -67,6 +96,13 @@ const MovieDetail = () => {
       dispatch({ type: "ADD_MOVIE", payload: movie as Movie });
     }
   };
+
+  const handleSurveySubmitted = (value: MovieSurveyResponse) => {
+    void value;
+    setSurveyVersion((current) => current + 1);
+    setIsSurveyExpanded(false);
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Backdrop */}
@@ -89,7 +125,7 @@ const MovieDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-8 -mt-32 relative z-10">
+      <div className="max-w-5xl mx-auto px-8 -mt-32 relative z-10 pb-16">
         <div className="flex gap-8">
           {/* Poster */}
           <img
@@ -156,6 +192,53 @@ const MovieDetail = () => {
             </button>
           </div>
         </div>
+
+        <div className="mt-12">
+          {survey && !isSurveyExpanded ? (
+            <MovieSurveySummary
+              survey={survey}
+              onEdit={() => setIsSurveyExpanded(true)}
+            />
+          ) : (
+            <>
+              {!isSurveyExpanded && (
+                <div className="rounded-2xl border border-gray-700 bg-gray-800/70 p-6 shadow-xl">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-yellow-400">
+                    Audience Feedback
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black text-white">
+                    Add your survey response
+                  </h2>
+                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-400">
+                    Capture structured feedback for this movie with multiple ratings,
+                    recommendation intent, viewing context, and freeform comments.
+                  </p>
+                  <button
+                    onClick={() => setIsSurveyExpanded(true)}
+                    className="mt-5 rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black transition-colors hover:bg-yellow-300"
+                  >
+                    {survey ? "Edit Feedback" : "Open Survey"}
+                  </button>
+                </div>
+              )}
+
+              {isSurveyExpanded && (
+                <MovieSurveyForm
+                  movieId={movie.id}
+                  userId={user?.id ?? null}
+                  existingSurvey={survey}
+                  onSubmitted={handleSurveySubmitted}
+                  onCancel={() => setIsSurveyExpanded(false)}
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        <AudienceSurveySnapshot
+          metrics={audienceMetrics}
+          comments={audienceComments}
+        />
       </div>
     </div>
   );
