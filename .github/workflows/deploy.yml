@@ -77,18 +77,31 @@ jobs:
 
   deploy-local:
     needs: [quality, detect-local-runner]
-    if: github.event_name != 'pull_request' && needs.detect-local-runner.outputs.has_runner == 'true' && secrets.LOCAL_DEPLOY_PATH != ''
+    if: github.event_name != 'pull_request' && needs.detect-local-runner.outputs.has_runner == 'true'
     runs-on: self-hosted
     env:
       LOCAL_DEPLOY_PATH: ${{ secrets.LOCAL_DEPLOY_PATH }}
     steps:
+      - name: Validate local deploy path secret
+        id: validate-path
+        shell: bash
+        run: |
+          if [ -z "$LOCAL_DEPLOY_PATH" ]; then
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "LOCAL_DEPLOY_PATH is not configured. Skipping local deploy."
+          else
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download build artifact
+        if: steps.validate-path.outputs.should_deploy == 'true'
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Deploy build to local machine path
+        if: steps.validate-path.outputs.should_deploy == 'true'
         run: |
           mkdir -p "$LOCAL_DEPLOY_PATH"
           rsync -av --delete dist/ "$LOCAL_DEPLOY_PATH"/
