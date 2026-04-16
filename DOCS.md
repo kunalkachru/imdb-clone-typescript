@@ -48,6 +48,53 @@
 ![Movie detail](docs/screenshots/movie-detail.png)
 ![Login](docs/screenshots/login-page.png)
 
+### Implementation Status Tracker
+
+#### Done
+
+- Core app deployment to GitHub Pages
+- Local production preview/deploy flow from project root
+- Auth flow hardening (success-only redirect behavior)
+- Watchlist persistence isolation by user key
+- Watchlist user-switch persistence race fix
+- Survey module on movie detail page:
+  - structured ratings
+  - recommendation/context fields
+  - two freeform feedback fields
+  - submit -> collapsed/minimized personal summary
+- Audience Snapshot module on movie detail page:
+  - seeded static audience entries
+  - computed aggregate metrics
+  - recent comment highlights
+- Automated test expansion + CI quality checks
+
+#### Pending (Planned)
+
+- Replace local survey persistence with API-backed persistence adapter
+- Replace seeded audience snapshot with backend-fed aggregate endpoint
+- Align survey payload and aggregate schema with analytics dashboard contracts
+
+#### Future Tasks (Resume-Friendly Queue)
+
+1. Add sorting/filter controls for audience comments
+2. Add pagination or "show more" for community highlights
+3. Add survey submission acknowledgements/toasts
+4. Add per-movie feedback trend visualizations (when backend is ready)
+5. Add richer moderation and text-quality checks for freeform feedback
+
+#### Resume Context
+
+- Current survey implementation is intentionally frontend-only and backend-ready by design.
+- Services to reference first when resuming:
+  - `src/services/survey.ts`
+  - `src/services/surveyCommunity.ts`
+- Primary UI integration point:
+  - `src/pages/MovieDetail.tsx`
+- Primary regression tests:
+  - `src/test/pages/MovieDetail.test.tsx`
+  - `src/test/services/survey.test.ts`
+  - `src/test/services/surveyCommunity.test.ts`
+
 ---
 
 ## 2. Project Overview

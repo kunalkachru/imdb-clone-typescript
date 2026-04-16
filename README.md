@@ -111,3 +111,8 @@ This is a good practice for teams that want one predictable place for test disco
 ## Documentation
 
 - Detailed docs: `DOCS.md`
+
+## Current Status
+
+- Completed: survey UI, collapsed personal feedback summary, seeded audience snapshot, and regression coverage.
+- Pending: backend/API survey persistence and server-driven audience aggregates.
