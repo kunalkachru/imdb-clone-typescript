@@ -11,7 +11,7 @@
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 import { WatchlistProvider } from "./context/WatchlistContext";
@@ -21,12 +21,12 @@ import { AuthProvider } from "./context/AuthContext";
 // safe here because index.html always has <div id="root">
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <WatchlistProvider>
           <App />
         </WatchlistProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 );

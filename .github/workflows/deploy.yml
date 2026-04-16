@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
@@ -17,14 +23,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
         env:
           VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+          VITE_TMDB_TOKEN: ${{ secrets.VITE_TMDB_TOKEN }}
+          VITE_TMDB_BASE_URL: https://api.themoviedb.org/3
+          VITE_TMDB_IMAGE_BASE_URL: https://image.tmdb.org/t/p
           VITE_BASE_URL: /imdb-clone-typescript/
 
       - name: Deploy to GitHub Pages
