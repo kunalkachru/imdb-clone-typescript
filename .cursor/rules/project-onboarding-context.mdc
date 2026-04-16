@@ -1,0 +1,24 @@
+---
+description: Project onboarding context for imdb-clone
+alwaysApply: true
+---
+
+# IMDB Clone Project Context
+
+When this repository is opened, first build a quick mental model before answering:
+
+1. Confirm stack and runtime from `package.json`, `vite.config.ts`, and `tsconfig*.json`.
+2. Read app bootstrap and routing in `src/main.tsx` and `src/App.tsx`.
+3. Understand page flows in `src/pages/` (`Home`, `MovieDetail`, `Watchlist`, `Login`, `Register`).
+4. Understand shared behavior in `src/components/` (`Navbar`, `SearchBar`, `ProtectedRoute`).
+5. Understand state and persistence in `src/context/` and `src/hooks/` (`useAuth`, `useWatchlist`, `useFetch`).
+6. Understand integrations in `src/services/` (`tmdb.ts` and `auth.ts`) and env contract in `src/types/env.d.ts` and `.env-example`.
+7. Use `DOCS.md` as project-specific source of truth when docs conflict with generic `README.md`.
+
+Working conventions for this repo:
+
+- Keep strict TypeScript types; prefer explicit interfaces/types from `src/types/`.
+- Preserve existing React Context + reducer architecture unless asked to refactor.
+- Do not introduce backend assumptions; this is a client-side SPA with TMDB API calls.
+- Keep UI style consistent with current Tailwind patterns and existing component behavior.
+- For fixes, validate impact on auth, watchlist persistence, search, and route protection.

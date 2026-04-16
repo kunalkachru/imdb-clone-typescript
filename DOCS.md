@@ -6,29 +6,49 @@
 
 ## Table of Contents
 
-1. [Project Overview](#1-project-overview)
-2. [Technology Stack](#2-technology-stack)
-3. [Project Structure](#3-project-structure)
-4. [High-Level Architecture](#4-high-level-architecture)
-5. [Routing](#5-routing)
-6. [Pages Reference](#6-pages-reference)
-7. [Components Reference](#7-components-reference)
-8. [State Management (Contexts)](#8-state-management-contexts)
-9. [Custom Hooks](#9-custom-hooks)
-10. [Services Layer](#10-services-layer)
-11. [TypeScript Key Concepts](#11-typescript-key-concepts)
-12. [Low-Level Design](#12-low-level-design)
-13. [Environment Variables](#13-environment-variables)
-14. [Local Setup Guide](#14-local-setup-guide)
-15. [Getting a TMDB API Key](#15-getting-a-tmdb-api-key)
-16. [Test Accounts](#16-test-accounts)
-17. [Available Scripts](#17-available-scripts)
-18. [Cloud Deployment](#18-cloud-deployment)
-19. [Common Errors & Fixes](#19-common-errors--fixes)
+1. [Latest Updates (Apr 2026)](#1-latest-updates-apr-2026)
+2. [Project Overview](#2-project-overview)
+3. [Technology Stack](#3-technology-stack)
+4. [Project Structure](#4-project-structure)
+5. [High-Level Architecture](#5-high-level-architecture)
+6. [Routing](#6-routing)
+7. [Pages Reference](#7-pages-reference)
+8. [Components Reference](#8-components-reference)
+9. [State Management (Contexts)](#9-state-management-contexts)
+10. [Custom Hooks](#10-custom-hooks)
+11. [Services Layer](#11-services-layer)
+12. [TypeScript Key Concepts](#12-typescript-key-concepts)
+13. [Low-Level Design](#13-low-level-design)
+14. [Environment Variables](#14-environment-variables)
+15. [Local Setup Guide](#15-local-setup-guide)
+16. [Getting a TMDB API Key](#16-getting-a-tmdb-api-key)
+17. [Test Accounts](#17-test-accounts)
+18. [Available Scripts](#18-available-scripts)
+19. [Cloud Deployment](#19-cloud-deployment)
+20. [Common Errors & Fixes](#20-common-errors--fixes)
 
 ---
 
-## 1. Project Overview
+## 1. Latest Updates (Apr 2026)
+
+- Live deployment: [https://kunalkachru.github.io/imdb-clone-typescript/](https://kunalkachru.github.io/imdb-clone-typescript/)
+- Router is now `HashRouter` for GitHub Pages compatibility.
+- Auth flow now only redirects on successful login/register.
+- Watchlist persistence is now user-scoped (`watchlist:<userId>`).
+- `tmdb.ts` now handles query strings safely and provides clearer API errors.
+- Test stack added: Vitest + Testing Library (`npm run test:*` scripts).
+- CI/CD added in one workflow: quality gate then optional local deploy then cloud deploy.
+
+### UI Snapshot Gallery
+
+![Home](docs/screenshots/home-page.png)
+![Search](docs/screenshots/search-results.png)
+![Movie detail](docs/screenshots/movie-detail.png)
+![Login](docs/screenshots/login-page.png)
+
+---
+
+## 2. Project Overview
 
 **IMDBClone** is a movie discovery web app that lets users:
 
@@ -65,7 +85,6 @@
 
 ```
 imdb-clone/
-├── public/                  # Static files served as-is (favicons, etc.)
 ├── src/
 │   ├── main.tsx             # 🚀 App entry point — mounts React into index.html
 │   ├── App.tsx              # Route definitions — maps URLs to page components
@@ -81,7 +100,6 @@ imdb-clone/
 │   ├── components/          # Reusable UI pieces used across pages
 │   │   ├── Navbar.tsx       # Top navigation bar with search
 │   │   ├── SearchBar.tsx    # Input + search button
-│   │   ├── MovieCard.tsx    # Individual movie card (currently unused/placeholder)
 │   │   └── ProtectedRoute.tsx # Blocks unauthenticated users from private routes
 │   │
 │   ├── context/             # Global state — shared across the whole app
@@ -98,6 +116,13 @@ imdb-clone/
 │   ├── services/            # External communication — API calls and auth logic
 │   │   ├── tmdb.ts          # All TMDB API functions (trending, search, detail)
 │   │   └── auth.ts          # Mock login/register logic (simulates a real backend)
+│   │
+│   ├── test/                # Centralized tests grouped by app layer
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   └── services/
 │   │
 │   └── types/               # TypeScript type definitions — the "shape" of all data
 │       ├── movie.ts         # Movie and MovieDetail interfaces
@@ -201,16 +226,16 @@ Routing is handled by **React Router v7**. The app uses client-side routing — 
 **Provider wrapping in `main.tsx`:**
 
 ```tsx
-<BrowserRouter>
+<HashRouter>
   <AuthProvider>
     <WatchlistProvider>
       <App />
     </WatchlistProvider>
   </AuthProvider>
-</BrowserRouter>
+</HashRouter>
 ```
 
-> The order matters: `BrowserRouter` must be outermost (enables routing), then providers wrap the app so all pages can access global state.
+> The order matters: router must be outermost (enables routing), then providers wrap the app so all pages can access global state.
 
 ---
 
@@ -544,6 +569,8 @@ const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 > **Never commit your `.env` file!** It contains secret keys. The `.gitignore` already excludes it. Use `.env-example` as a template.
 
+> **CI/CD nuance:** A developer's local `.env` is used only on that machine. GitHub-hosted Actions runners cannot read your machine's `.env`, so workflow builds must receive values from GitHub Secrets (or a generated env file created during the run).
+
 ---
 
 ## 14. Local Setup Guide
@@ -639,7 +666,7 @@ You can also register new accounts via the `/register` page. Note: since there's
 
 ---
 
-## 17. Available Scripts
+## 18. Available Scripts
 
 Run these commands from inside the `imdb-clone/` directory:
 
@@ -649,14 +676,43 @@ Run these commands from inside the `imdb-clone/` directory:
 | `npm run build`   | Type-checks with TypeScript then builds optimised files into `dist/` |
 | `npm run preview` | Serves the built `dist/` folder locally (test the production build)  |
 | `npm run lint`    | Runs ESLint — checks for code style issues and TypeScript errors     |
+| `npm run test`    | Runs tests in watch mode                                              |
+| `npm run test:run`| Runs all tests once                                                   |
+| `npm run test:coverage` | Runs tests and generates coverage reports                      |
 
 > **Tip:** Always run `npm run build` before deploying to make sure there are no TypeScript errors.
 
 ---
 
-## 18. Cloud Deployment
+## 19. Cloud Deployment
 
-### Option A — Vercel (Recommended — Easiest)
+### Option A — GitHub Pages (Current Production)
+
+This project is currently deployed with GitHub Actions to:
+[https://kunalkachru.github.io/imdb-clone-typescript/](https://kunalkachru.github.io/imdb-clone-typescript/)
+
+Key points in this repo:
+
+- Router uses `HashRouter` (required for GitHub Pages route refresh behavior).
+- `vite.config.ts` reads `VITE_BASE_URL` for subpath deployment.
+- Deploy workflow: `.github/workflows/deploy.yml`
+- Local deploy step runs only when:
+  - an online self-hosted runner exists, and
+  - `LOCAL_DEPLOY_PATH` repo secret is configured.
+
+### CI/CD Pipeline Stages
+
+1. `quality` job: lint -> test -> build
+2. `detect-local-runner` job: checks whether self-hosted runner is available
+3. `deploy-local` job (optional): copies `dist/` to local path on self-hosted runner
+4. `deploy-cloud` job: publishes `dist/` to GitHub Pages
+
+Required GitHub secrets:
+
+- `VITE_TMDB_API_KEY`
+- `VITE_TMDB_TOKEN`
+
+### Option B — Vercel (Alternative)
 
 Vercel is the easiest way to deploy a Vite app. It's free for personal projects.
 
@@ -675,7 +731,7 @@ Vercel is the easiest way to deploy a Vite app. It's free for personal projects.
 
 ---
 
-### Option B — Netlify
+### Option C — Netlify
 
 1. Push code to GitHub
 2. Go to [https://netlify.com](https://netlify.com) → New site from Git
@@ -696,7 +752,7 @@ Vercel is the easiest way to deploy a Vite app. It's free for personal projects.
 
 ---
 
-### Option C — Docker (Advanced)
+### Option D — Docker (Advanced)
 
 Use this if you want to run the app in a container, e.g. on a VPS or Kubernetes cluster.
 

@@ -26,8 +26,10 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await register(formData);
-    navigate("/");
+    const isSuccess = await register(formData);
+    if (isSuccess) {
+      navigate("/");
+    }
   };
 
   const isLoading = status === AuthStatus.LOADING;

@@ -28,6 +28,13 @@ const initialState: AuthState = {
   error: null,
 };
 
+const loggedOutState: AuthState = {
+  user: null,
+  token: null,
+  status: AuthStatusEnum.IDLE,
+  error: null,
+};
+
 // TS LESSON: reducer with discriminated union actions
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
@@ -57,7 +64,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     case "AUTH_LOGOUT":
-      return initialState; // reset everything to initial
+      return loggedOutState;
   }
 }
 
@@ -70,7 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // TS LESSON: async function with typed parameter
-  const login = async (credentials: LoginCredentials): Promise<void> => {
+  const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
       dispatch({ type: "AUTH_START" });
       const { user, token } = await loginUser(credentials);
@@ -79,16 +86,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // store token in localStorage for persistence
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      return true;
     } catch (err: unknown) {
       dispatch({
         type: "AUTH_ERROR",
         payload: err instanceof Error ? err.message : "Login failed",
       });
+      return false;
     }
   };
 
   // TS LESSON: same pattern for register
-  const register = async (credentials: RegisterCredentials): Promise<void> => {
+  const register = async (
+    credentials: RegisterCredentials,
+  ): Promise<boolean> => {
     try {
       dispatch({ type: "AUTH_START" });
       const { user, token } = await registerUser(credentials);
@@ -96,11 +107,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      return true;
     } catch (err: unknown) {
       dispatch({
         type: "AUTH_ERROR",
         payload: err instanceof Error ? err.message : "Registration failed",
       });
+      return false;
     }
   };
 

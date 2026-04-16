@@ -6,6 +6,7 @@ import type { Movie } from "./movie";
 type WatchlistAction =
   | { type: "ADD_MOVIE"; payload: Movie } // payload = full Movie object
   | { type: "REMOVE_MOVIE"; payload: number } // payload = just the id
+  | { type: "SET_MOVIES"; payload: Movie[] } // payload = hydrate/replace list
   | { type: "CLEAR" }; // no payload needed
 
 // TS LESSON: interface for context shape

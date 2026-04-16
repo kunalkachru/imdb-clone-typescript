@@ -1,5 +1,5 @@
 //
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface FetchState<T> {
   data: T | null;
@@ -14,13 +14,19 @@ function useFetch<T>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchRef = useRef(fetchFn);
+
+  useEffect(() => {
+    fetchRef.current = fetchFn;
+  }, [fetchFn]);
 
   // TS LESSON: useCallback — memoizes the function
   // so it's not recreated on every render
   // only recreates when dependency changes
   const memoizedFetch = useCallback(() => {
-    return fetchFn();
-  }, [dependency]); // ← only re-creates when dependency changes
+    void dependency;
+    return fetchRef.current();
+  }, [dependency]);
 
   useEffect(() => {
     let cancelled = false;

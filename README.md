@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# IMDB Clone (React + TypeScript)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Movie discovery app built with React, TypeScript, Vite, Tailwind, and TMDB API.
 
-Currently, two official plugins are available:
+## Live Deployment
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Production URL: [https://kunalkachru.github.io/imdb-clone-typescript/](https://kunalkachru.github.io/imdb-clone-typescript/)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Browse trending movies from TMDB
+- Search movies with URL-synced query state
+- View movie details and manage watchlist
+- Register/login with mock auth flow
+- Protected routes for watchlist
+- Per-user watchlist persistence in localStorage
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + React Router 7
+- TypeScript 5
+- Vite 7 + Tailwind 4
+- ESLint 9
+- Vitest + Testing Library
+- GitHub Actions CI + GitHub Pages deployment
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. Install dependencies:
+   - `npm ci`
+2. Create `.env` from `.env-example`.
+3. Run the app:
+   - `npm run dev`
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Environment Variables
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Required:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_TMDB_API_KEY`
+- `VITE_TMDB_TOKEN`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Optional (defaults provided in CI):
+
+- `VITE_TMDB_BASE_URL` (default: `https://api.themoviedb.org/3`)
+- `VITE_TMDB_IMAGE_BASE_URL` (default: `https://image.tmdb.org/t/p`)
+- `VITE_BASE_URL` (for GitHub Pages subpath)
+
+Important CI note:
+
+- Local `.env` works for local development/build only.
+- GitHub-hosted Actions runners cannot read your local `.env`; they use repository secrets.
+
+## Scripts
+
+- `npm run dev` - start local dev server
+- `npm run lint` - run ESLint
+- `npm run test` - run tests in watch mode
+- `npm run test:run` - run tests once
+- `npm run test:coverage` - run tests with coverage
+- `npm run build` - type-check and production build
+- `npm run preview` - preview production build locally
+
+## CI/CD
+
+- Single workflow: `.github/workflows/deploy.yml`
+- Pipeline order:
+  1. Lint
+  2. Test
+  3. Build
+  4. Optional local deploy (self-hosted runner + `LOCAL_DEPLOY_PATH` secret)
+  5. Cloud deploy to GitHub Pages
+
+## Test Organization
+
+- All tests are centralized under `src/test/` and grouped by layer:
+  - `src/test/services/`
+  - `src/test/hooks/`
+  - `src/test/context/`
+  - `src/test/components/`
+  - `src/test/pages/`
+
+This is a good practice for teams that want one predictable place for test discovery, review, and CI maintenance.
+
+## UI Screenshots
+
+### Home / Trending
+![Home page](docs/screenshots/home-page.png)
+
+### Search Results
+![Search results](docs/screenshots/search-results.png)
+
+### Movie Detail
+![Movie detail](docs/screenshots/movie-detail.png)
+
+### Login
+![Login page](docs/screenshots/login-page.png)
+
+## Documentation
+
+- Detailed docs: `DOCS.md`

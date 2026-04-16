@@ -1,19 +1,31 @@
-name: Deploy to GitHub Pages
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
   id-token: write
+  actions: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  quality:
     runs-on: ubuntu-latest
+    env:
+      VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+      VITE_TMDB_TOKEN: ${{ secrets.VITE_TMDB_TOKEN }}
+      VITE_TMDB_BASE_URL: https://api.themoviedb.org/3
+      VITE_TMDB_IMAGE_BASE_URL: https://image.tmdb.org/t/p
+      VITE_BASE_URL: /imdb-clone-typescript/
 
     steps:
       - name: Checkout repo
@@ -28,17 +40,75 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:run
+
       - name: Build
         run: npm run build
-        env:
-          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
-          VITE_TMDB_TOKEN: ${{ secrets.VITE_TMDB_TOKEN }}
-          VITE_TMDB_BASE_URL: https://api.themoviedb.org/3
-          VITE_TMDB_IMAGE_BASE_URL: https://image.tmdb.org/t/p
-          VITE_BASE_URL: /imdb-clone-typescript/
+
+      - name: Upload build artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  detect-local-runner:
+    needs: quality
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      has_runner: ${{ steps.detect.outputs.has_runner }}
+    steps:
+      - name: Check for online self-hosted runner
+        id: detect
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listSelfHostedRunnersForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const hasOnlineRunner = data.runners.some((runner) => runner.status === "online");
+            core.setOutput("has_runner", hasOnlineRunner ? "true" : "false");
+
+  deploy-local:
+    needs: [quality, detect-local-runner]
+    if: github.event_name != 'pull_request' && needs.detect-local-runner.outputs.has_runner == 'true' && secrets.LOCAL_DEPLOY_PATH != ''
+    runs-on: self-hosted
+    env:
+      LOCAL_DEPLOY_PATH: ${{ secrets.LOCAL_DEPLOY_PATH }}
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy build to local machine path
+        run: |
+          mkdir -p "$LOCAL_DEPLOY_PATH"
+          rsync -av --delete dist/ "$LOCAL_DEPLOY_PATH"/
+
+  deploy-cloud:
+    needs: quality
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: dist

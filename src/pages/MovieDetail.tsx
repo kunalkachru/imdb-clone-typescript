@@ -9,6 +9,7 @@ const MovieDetail = () => {
   // we destructure and type the id explicitly
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const movieId = Number(id);
 
   // TS LESSON: consuming context — fully typed, no null checks needed
   const { dispatch, isInWatchlist } = useWatchlist();
@@ -20,9 +21,22 @@ const MovieDetail = () => {
     loading,
     error,
   } = useFetch<MovieDetailType>(
-    () => getMovieDetail(Number(id)),
-    id, // re-fetch if id changes
+    () => {
+      if (!Number.isFinite(movieId) || movieId <= 0) {
+        throw new Error("Invalid movie id");
+      }
+      return getMovieDetail(movieId);
+    },
+    movieId, // re-fetch if id changes
   );
+
+  if (!Number.isFinite(movieId) || movieId <= 0) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-900">
+        <p className="text-red-500 text-2xl">Invalid movie id</p>
+      </div>
+    );
+  }
 
   if (loading)
     return (
@@ -111,9 +125,9 @@ const MovieDetail = () => {
             </div>
 
             {/* Genres — optional array */}
-            {movie.genre && (
+            {movie.genres && movie.genres.length > 0 && (
               <div className="flex gap-2 mb-4 flex-wrap">
-                {movie.genre.map((genre_item) => (
+                {movie.genres.map((genre_item) => (
                   <span
                     key={genre_item.id}
                     className="px-3 py-1 bg-yellow-400/20 text-yellow-400 rounded-full text-sm font-medium"

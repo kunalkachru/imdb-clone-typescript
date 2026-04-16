@@ -14,11 +14,18 @@ const headers: HeadersInit = {
 // Instead of writing fetchMovies(), fetchMovieDetail() etc separately,
 // one generic function handles ALL API calls and returns the right type
 async function fetchFromTMDB<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${BASE_URL}${endpoint}?api_key=${API_KEY}`, {
+  const url = new URL(`${BASE_URL}${endpoint}`);
+  if (API_KEY) {
+    url.searchParams.set("api_key", API_KEY);
+  }
+
+  const response = await fetch(url.toString(), {
     headers,
   });
   if (!response.ok) {
-    throw new Error(`Error fetching data from TMDB: ${response.statusText}`);
+    throw new Error(
+      `Error fetching data from TMDB (${response.status}): ${response.statusText}`,
+    );
   }
   return response.json() as Promise<T>;
 }
@@ -44,4 +51,8 @@ export const searchMovies = (query: string, page = 1) =>
   );
 
 export const getMovieDetail = (id: number) =>
-  fetchFromTMDB<MovieDetail>(`/movie/${id}`);
+  fetchFromTMDB<MovieDetail>(`/movie/${id}`).then((movie) => ({
+    ...movie,
+    // Keep backwards compatibility with previous "genre" field usage.
+    genres: movie.genres ?? [],
+  }));

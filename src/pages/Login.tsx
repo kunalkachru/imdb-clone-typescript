@@ -27,8 +27,10 @@ const Login = () => {
   // TS LESSON: typing form submit event
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await login(formData); // formData is LoginCredentials — fully typed
-    navigate("/"); // redirect after login
+    const isSuccess = await login(formData); // formData is LoginCredentials — fully typed
+    if (isSuccess) {
+      navigate("/");
+    }
   };
 
   // TS LESSON: comparing with enum value
