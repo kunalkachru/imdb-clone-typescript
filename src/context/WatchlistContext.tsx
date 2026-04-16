@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useContext, useMemo } from "react";
+import { useReducer, useEffect, useContext, useMemo, useRef } from "react";
 import type { Movie } from "../types/movie";
 import type { WatchlistAction } from "../types/watchlist";
 import { WatchlistContext } from "./WatchlistContextDef";
@@ -43,14 +43,21 @@ export const WatchlistProvider = ({ children }: WatchlistProviderProps) => {
     [],
     () => loadWatchlist(storageKey),
   );
+  const canPersistRef = useRef(false);
 
   // re-hydrate when active user changes
   useEffect(() => {
+    // Prevent stale state from previous user being persisted under a new key.
+    canPersistRef.current = false;
     dispatch({ type: "SET_MOVIES", payload: loadWatchlist(storageKey) });
   }, [storageKey]);
 
   // save to localStorage whenever watchlist changes for active user key
   useEffect(() => {
+    if (!canPersistRef.current) {
+      canPersistRef.current = true;
+      return;
+    }
     localStorage.setItem(storageKey, JSON.stringify(watchlist));
   }, [storageKey, watchlist]);
 

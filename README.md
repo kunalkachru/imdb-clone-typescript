@@ -32,6 +32,17 @@ Movie discovery app built with React, TypeScript, Vite, Tailwind, and TMDB API.
 3. Run the app:
    - `npm run dev`
 
+## Local Deploy (Production Preview)
+
+You can deploy locally from the same project root. No need to copy files to another directory.
+
+1. Build:
+   - `npm run build`
+2. Preview the built app:
+   - `npm run preview -- --host 0.0.0.0 --port 8080`
+3. Open:
+   - [http://localhost:8080/](http://localhost:8080/)
+
 ## Environment Variables
 
 Required:

@@ -94,4 +94,35 @@ describe("WatchlistContext", () => {
     await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
     expect(localStorage.getItem("watchlist:2")).toContain('"id":2');
   });
+
+  it("does not leak previous user's movies into a new user's empty watchlist", async () => {
+    localStorage.setItem("watchlist:1", JSON.stringify([movie]));
+    localStorage.setItem("watchlist:2", JSON.stringify([]));
+
+    const { rerender } = render(
+      <AuthContext.Provider value={defaultAuthValue}>
+        <WatchlistProvider>
+          <Harness />
+        </WatchlistProvider>
+      </AuthContext.Provider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+
+    rerender(
+      <AuthContext.Provider
+        value={{
+          ...defaultAuthValue,
+          user: { id: 2, name: "Jane", email: "jane@example.com", createdAt: "now" },
+        }}
+      >
+        <WatchlistProvider>
+          <Harness />
+        </WatchlistProvider>
+      </AuthContext.Provider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("0"));
+    expect(localStorage.getItem("watchlist:2")).toBe("[]");
+  });
 });

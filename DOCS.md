@@ -632,6 +632,21 @@ npm run dev
 - Login with: `john@example.com` / `password123`
 - Add movies to your watchlist
 
+### Local Deployment Preview (Production Build)
+
+You do not need to copy files outside this project to preview locally.
+
+Run from project root:
+
+```bash
+npm run build
+npm run preview -- --host 0.0.0.0 --port 8080
+```
+
+Open:
+
+- [http://localhost:8080/](http://localhost:8080/)
+
 ---
 
 ## 15. Getting a TMDB API Key
