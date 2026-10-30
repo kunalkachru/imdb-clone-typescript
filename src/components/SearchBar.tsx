@@ -4,6 +4,7 @@ interface SearchBarProps {
   onChange: (value: string) => void;
   onSearch: () => void;
   placeholder?: string;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 const SearchBar = ({
@@ -11,6 +12,7 @@ const SearchBar = ({
   onChange,
   onSearch,
   placeholder = "Search movies...",
+  inputRef,
 }: SearchBarProps) => {
   // TS : typing keyboard events
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -25,6 +27,7 @@ const SearchBar = ({
   return (
     <div className="flex gap-2 w-full max-w-xl">
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={handleChange}

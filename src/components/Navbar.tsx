@@ -7,9 +7,15 @@ interface NavbarProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onSearch: () => void;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
-const Navbar = ({ searchQuery, onSearchChange, onSearch }: NavbarProps) => {
+const Navbar = ({
+  searchQuery,
+  onSearchChange,
+  onSearch,
+  searchInputRef,
+}: NavbarProps) => {
   // consume auth context — get user and logout
   const { user, logout } = useAuth();
 
@@ -28,6 +34,7 @@ const Navbar = ({ searchQuery, onSearchChange, onSearch }: NavbarProps) => {
         value={searchQuery}
         onChange={onSearchChange}
         onSearch={onSearch}
+        inputRef={searchInputRef}
       />
 
       {/* Nav Links */}
