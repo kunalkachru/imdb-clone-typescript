@@ -71,7 +71,7 @@ const Watchlist = () => {
         {/* No search results */}
         {watchlist.length > 0 && filteredMovies.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
-            <p className="text-gray-400 text-xl">
+            <p role="status" className="text-gray-400 text-xl">
               No movies match "{searchQuery}"
             </p>
             <button

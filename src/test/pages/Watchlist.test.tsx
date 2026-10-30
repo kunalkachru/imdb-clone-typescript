@@ -90,6 +90,7 @@ describe("Watchlist page", () => {
     await userEvent.type(screen.getByPlaceholderText("Search movies..."), "zzz");
 
     expect(screen.getByText('No movies match "zzz"')).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent('No movies match "zzz"');
     expect(screen.queryByText(/No movies matching/)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear Search" })).not.toBeInTheDocument();
@@ -107,6 +108,7 @@ describe("Watchlist page", () => {
     await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
 
     expect(searchInput).toHaveValue("");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(2);
     expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     expect(screen.getByText("Untitled Project")).toBeInTheDocument();
@@ -156,6 +158,7 @@ describe("Watchlist page", () => {
 
     await userEvent.type(screen.getByPlaceholderText("Search movies..."), "incep");
 
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
     unmount();
@@ -169,6 +172,7 @@ describe("Watchlist page", () => {
     await userEvent.type(screen.getByPlaceholderText("Search movies..."), "zzz");
 
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
   });
