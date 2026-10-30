@@ -62,6 +62,55 @@ describe("Home page", () => {
     expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
   });
 
+  it("shows the release year on cards and keeps the bare title for alt text", () => {
+    const releaseDate = "2010-07-16";
+    const year = releaseDate.slice(0, 4);
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 2,
+          results: [
+            {
+              id: 1,
+              title: "Inception",
+              vote_average: 8.4,
+              poster_path: "/p.jpg",
+              release_date: releaseDate,
+            },
+            {
+              id: 2,
+              title: "Untitled Project",
+              vote_average: 5,
+              poster_path: "/q.jpg",
+              release_date: "",
+            },
+          ],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    expect(headings[0].textContent).toBe(`Inception (${year})`);
+    expect(headings[1].textContent).toBe("Untitled Project");
+    expect(screen.getByRole("img", { name: "Inception" })).toBeInTheDocument();
+  });
+
   it("searches and displays result heading", async () => {
     mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
       void fetchFn;

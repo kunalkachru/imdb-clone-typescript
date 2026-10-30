@@ -61,8 +61,22 @@ describe("Watchlist page", () => {
       isInWatchlist: () => true,
     });
 
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Clear All" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "CLEAR" });
+  });
+
+  it("shows the release year for dated movies and the bare title for undated ones", () => {
+    const year = movie.release_date.slice(0, 4);
+    renderWithContext({
+      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", release_date: "" }],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    expect(headings[0].textContent).toBe(`Inception (${year})`);
+    expect(headings[1].textContent).toBe("Untitled Project");
+    expect(screen.getByRole("img", { name: "Inception" })).toBeInTheDocument();
   });
 });
