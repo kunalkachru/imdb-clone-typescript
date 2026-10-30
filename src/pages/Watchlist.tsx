@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWatchlist } from "../hooks/useWatchlist";
 import type { Movie } from "../types/movie";
@@ -11,6 +11,7 @@ const Watchlist = () => {
 
   // TS LESSON: local search state — filters watchlist only
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // TS LESSON: derived state — filter movies based on searchQuery
   // no API call needed — just filter existing array
@@ -35,6 +36,7 @@ const Watchlist = () => {
         searchQuery={searchQuery}
         onSearchChange={(val: string) => setSearchQuery(val)}
         onSearch={handleSearch}
+        searchInputRef={searchInputRef}
       />
 
       <div className="max-w-6xl mx-auto p-8">
@@ -73,7 +75,10 @@ const Watchlist = () => {
               No movies match "{searchQuery}"
             </p>
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchQuery("");
+                searchInputRef.current?.focus();
+              }}
               className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300"
             >
               Clear search

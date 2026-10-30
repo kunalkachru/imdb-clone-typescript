@@ -113,6 +113,40 @@ describe("Watchlist page", () => {
     expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
   });
 
+  it("focuses the search input after 'Clear search' empties it", async () => {
+    renderWithContext({
+      watchlist: [movie],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    const searchInput = screen.getByPlaceholderText("Search movies...");
+    await userEvent.type(searchInput, "zzz");
+    await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(searchInput).toHaveValue("");
+    expect(searchInput).toHaveFocus();
+
+    await userEvent.keyboard("inc");
+    expect(searchInput).toHaveValue("inc");
+  });
+
+  it("does not focus the search input on first render or after 'Clear All'", async () => {
+    const dispatch = vi.fn();
+    renderWithContext({
+      watchlist: [movie],
+      dispatch,
+      isInWatchlist: () => true,
+    });
+
+    const searchInput = screen.getByPlaceholderText("Search movies...");
+    expect(searchInput).not.toHaveFocus();
+
+    await userEvent.click(screen.getByRole("button", { name: "Clear All" }));
+    expect(dispatch).toHaveBeenCalledWith({ type: "CLEAR" });
+    expect(searchInput).not.toHaveFocus();
+  });
+
   it("hides the no-match message and 'Clear search' when the query matches or the watchlist is empty", async () => {
     const { unmount } = renderWithContext({
       watchlist: [movie],
