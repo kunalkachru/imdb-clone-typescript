@@ -70,13 +70,13 @@ const Watchlist = () => {
         {watchlist.length > 0 && filteredMovies.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
             <p className="text-gray-400 text-xl">
-              No movies matching "{searchQuery}" in your watchlist
+              No movies match "{searchQuery}"
             </p>
             <button
               onClick={() => setSearchQuery("")}
               className="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300"
             >
-              Clear Search
+              Clear search
             </button>
           </div>
         )}

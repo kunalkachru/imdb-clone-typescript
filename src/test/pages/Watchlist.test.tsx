@@ -79,4 +79,63 @@ describe("Watchlist page", () => {
     expect(headings[1].textContent).toBe("Untitled Project");
     expect(screen.getByRole("img", { name: "Inception" })).toBeInTheDocument();
   });
+
+  it("shows the no-match message with the typed query and a 'Clear search' button", async () => {
+    renderWithContext({
+      watchlist: [movie],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    await userEvent.type(screen.getByPlaceholderText("Search movies..."), "zzz");
+
+    expect(screen.getByText('No movies match "zzz"')).toBeInTheDocument();
+    expect(screen.queryByText(/No movies matching/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear Search" })).not.toBeInTheDocument();
+  });
+
+  it("clears the search and shows the full watchlist again", async () => {
+    renderWithContext({
+      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", release_date: "" }],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    const searchInput = screen.getByPlaceholderText("Search movies...");
+    await userEvent.type(searchInput, "zzz");
+    await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(searchInput).toHaveValue("");
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(2);
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
+    expect(screen.getByText("Untitled Project")).toBeInTheDocument();
+    expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
+  });
+
+  it("hides the no-match message and 'Clear search' when the query matches or the watchlist is empty", async () => {
+    const { unmount } = renderWithContext({
+      watchlist: [movie],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    await userEvent.type(screen.getByPlaceholderText("Search movies..."), "incep");
+
+    expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
+    unmount();
+
+    renderWithContext({
+      watchlist: [],
+      dispatch: vi.fn(),
+      isInWatchlist: () => false,
+    });
+
+    await userEvent.type(screen.getByPlaceholderText("Search movies..."), "zzz");
+
+    expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
+    expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
+  });
 });
