@@ -10,6 +10,7 @@ import {
 } from "../services/tmdb";
 import type { Genre, Movie } from "../types/movie";
 import Navbar from "../components/Navbar";
+import { formatMovieTitle } from "../utils/formatMovieTitle";
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -205,7 +206,7 @@ const Home = () => {
               />
               <div className="p-3">
                 <h2 className="text-white font-semibold text-sm truncate">
-                  {movie.title}
+                  {formatMovieTitle(movie.title, movie.release_date)}
                 </h2>
                 <p className="text-yellow-400 text-sm mt-1">
                   ⭐ {movie.vote_average.toFixed(1)}
