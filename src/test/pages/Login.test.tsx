@@ -68,4 +68,44 @@ describe("Login page", () => {
     );
     expect(screen.queryByText("Home page")).not.toBeInTheDocument();
   });
+
+  it("shows the helper text after the form", () => {
+    renderLoginFlow();
+
+    const helper = screen.getByTestId("login-helper-text");
+    expect(helper).toHaveTextContent(
+      "Demo only: sign-in uses local mock accounts in your browser, and your watchlist is available after you sign in.",
+    );
+    const form = document.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(
+      form!.compareDocumentPosition(helper) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("keeps the labels and an enabled Sign In button", () => {
+    renderLoginFlow();
+
+    expect(screen.getByText("Email")).toBeInTheDocument();
+    expect(screen.getByText("Password")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
+  });
+
+  it("keeps the helper text visible while an error is shown", async () => {
+    loginUserMock.mockRejectedValueOnce(new Error("Invalid email or password"));
+
+    renderLoginFlow();
+
+    await userEvent.type(
+      screen.getByPlaceholderText("john@example.com"),
+      "john@example.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "wrong");
+    await userEvent.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Invalid email or password")).toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("login-helper-text")).toBeInTheDocument();
+  });
 });
