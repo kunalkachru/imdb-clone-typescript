@@ -96,6 +96,15 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Helper text */}
+        <p
+          data-testid="login-helper-text"
+          className="text-gray-400 text-sm text-center mt-4"
+        >
+          Demo only: sign-in uses local mock accounts in your browser, and your
+          watchlist is available after you sign in.
+        </p>
+
         {/* Register link */}
         <p className="text-gray-400 text-center mt-6">
           Don't have an account?{" "}

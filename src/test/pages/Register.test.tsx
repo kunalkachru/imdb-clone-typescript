@@ -31,6 +31,25 @@ describe("Register page", () => {
     localStorage.clear();
   });
 
+  it("keeps the helper text visible while an error is shown", async () => {
+    registerUserMock.mockRejectedValueOnce(new Error("Email already registered"));
+
+    renderRegisterFlow();
+
+    await userEvent.type(screen.getByPlaceholderText("John Doe"), "John");
+    await userEvent.type(
+      screen.getByPlaceholderText("john@example.com"),
+      "john@example.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Email already registered")).toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("register-helper-text")).toBeInTheDocument();
+  });
+
   it("navigates home on successful registration", async () => {
     registerUserMock.mockResolvedValueOnce({
       user: { id: 3, name: "John", email: "john@example.com", createdAt: "now" },
