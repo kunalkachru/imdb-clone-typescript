@@ -31,6 +31,47 @@ describe("Register page", () => {
     localStorage.clear();
   });
 
+  it("shows the helper text after the form and keeps the labels and submit button", () => {
+    renderRegisterFlow();
+
+    const helper = screen.getByTestId("register-helper-text");
+    expect(helper).toHaveTextContent(
+      "Demo only: sign-in uses local mock accounts in your browser, and your watchlist is available after you sign in.",
+    );
+
+    const form = document.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(
+      form!.compareDocumentPosition(helper) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    expect(screen.getByText("Full Name")).toBeInTheDocument();
+    expect(screen.getByText("Email")).toBeInTheDocument();
+    expect(screen.getByText("Password")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create Account" }),
+    ).toBeEnabled();
+  });
+
+  it("keeps the helper text visible while an error is shown", async () => {
+    registerUserMock.mockRejectedValueOnce(new Error("Email already registered"));
+
+    renderRegisterFlow();
+
+    await userEvent.type(screen.getByPlaceholderText("John Doe"), "John");
+    await userEvent.type(
+      screen.getByPlaceholderText("john@example.com"),
+      "john@example.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Email already registered")).toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("register-helper-text")).toBeInTheDocument();
+  });
+
   it("navigates home on successful registration", async () => {
     registerUserMock.mockResolvedValueOnce({
       user: { id: 3, name: "John", email: "john@example.com", createdAt: "now" },

@@ -110,6 +110,15 @@ const Register = () => {
           </button>
         </form>
 
+        {/* Helper text */}
+        <p
+          data-testid="register-helper-text"
+          className="text-gray-400 text-sm text-center mt-6"
+        >
+          Demo only: sign-in uses local mock accounts in your browser, and your
+          watchlist is available after you sign in.
+        </p>
+
         {/* Login link */}
         <p className="text-gray-400 text-center mt-6">
           Already have an account?{" "}
