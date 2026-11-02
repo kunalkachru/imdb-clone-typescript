@@ -31,7 +31,6 @@ const PasswordInput = ({ className = "", ...inputProps }: PasswordInputProps) =>
           // eye-off icon
           <svg
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
             width="20"
             height="20"
             viewBox="0 0 24 24"
@@ -50,7 +49,6 @@ const PasswordInput = ({ className = "", ...inputProps }: PasswordInputProps) =>
           // eye icon
           <svg
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
             width="20"
             height="20"
             viewBox="0 0 24 24"
