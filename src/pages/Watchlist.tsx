@@ -55,9 +55,15 @@ const Watchlist = () => {
 
         {/* Empty watchlist */}
         {watchlist.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <div className="flex flex-col items-center justify-center min-h-[16rem] px-4 gap-4 text-center">
             <p className="text-gray-400 text-xl">
               No movies in your watchlist yet
+            </p>
+            <p
+              data-testid="watchlist-empty-guidance"
+              className="text-gray-400 text-base max-w-md text-center"
+            >
+              Signed-in users can save films to their watchlist from any movie page.
             </p>
             <button
               onClick={() => navigate("/")}

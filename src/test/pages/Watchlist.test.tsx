@@ -52,6 +52,48 @@ describe("Watchlist page", () => {
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
   });
 
+  it("shows the headline and guidance paragraph in the empty state", () => {
+    renderWithContext({
+      watchlist: [],
+      dispatch: vi.fn(),
+      isInWatchlist: () => false,
+    });
+
+    expect(screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist" })).toBeInTheDocument();
+    expect(screen.getByTestId("watchlist-empty-guidance")).toHaveTextContent(
+      "Signed-in users can save films to their watchlist from any movie page.",
+    );
+    expect(screen.getByTestId("watchlist-empty-guidance")).not.toHaveAttribute("role");
+  });
+
+  it("renders no movie cards, images or search-result messages in the empty state", () => {
+    renderWithContext({
+      watchlist: [],
+      dispatch: vi.fn(),
+      isInWatchlist: () => false,
+    });
+
+    expect(screen.queryAllByRole("heading", { level: 2 })).toHaveLength(0);
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Browse Movies" })).toBeInTheDocument();
+  });
+
+  it("centers and sizes the empty-state block for small screens", () => {
+    renderWithContext({
+      watchlist: [],
+      dispatch: vi.fn(),
+      isInWatchlist: () => false,
+    });
+
+    const container = screen.getByText("No movies in your watchlist yet").parentElement!;
+    expect(container).toHaveClass("items-center");
+    expect(container.className).toMatch(/(^|\s)min-h-/);
+    expect(container).not.toHaveClass("h-64");
+    expect(container).toHaveClass("px-4");
+    expect(screen.getByTestId("watchlist-empty-guidance")).toHaveClass("text-center");
+  });
+
   it("renders movies and supports clearing", async () => {
     const dispatch = vi.fn();
 
