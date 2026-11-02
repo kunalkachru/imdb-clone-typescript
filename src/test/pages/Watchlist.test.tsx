@@ -59,7 +59,7 @@ describe("Watchlist page", () => {
       isInWatchlist: () => false,
     });
 
-    expect(screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist (0)" })).toBeInTheDocument();
     expect(screen.getByTestId("watchlist-empty-guidance")).toHaveTextContent(
       "Signed-in users can save films to their watchlist from any movie page.",
     );
@@ -92,6 +92,42 @@ describe("Watchlist page", () => {
     expect(container).not.toHaveClass("h-64");
     expect(container).toHaveClass("px-4");
     expect(screen.getByTestId("watchlist-empty-guidance")).toHaveClass("text-center");
+  });
+
+  it("shows the total count in the headline when no search is active", () => {
+    renderWithContext({
+      watchlist: [
+        movie,
+        { ...movie, id: 2, title: "Untitled Project", release_date: "" },
+        { ...movie, id: 3, title: "Third Film", release_date: "" },
+      ],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist (3)" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the number of matching films in the headline while searching", async () => {
+    renderWithContext({
+      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", release_date: "" }],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    const searchInput = screen.getByPlaceholderText("Search movies...");
+    await userEvent.type(searchInput, "incep");
+    expect(
+      screen.getByRole("heading", { level: 1 }),
+    ).toHaveTextContent(/in Watchlist \(1\)$/);
+
+    await userEvent.clear(searchInput);
+    await userEvent.type(searchInput, "zzz");
+    expect(
+      screen.getByRole("heading", { level: 1 }),
+    ).toHaveTextContent(/in Watchlist \(0\)$/);
   });
 
   it("renders movies and supports clearing", async () => {
