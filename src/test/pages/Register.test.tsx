@@ -31,6 +31,32 @@ describe("Register page", () => {
     localStorage.clear();
   });
 
+  it("masks the password by default and toggles visibility without submitting", async () => {
+    renderRegisterFlow();
+
+    const password = screen.getByPlaceholderText("••••••••");
+    expect(password, "password input should default to type=password").toHaveAttribute(
+      "type",
+      "password",
+    );
+
+    await userEvent.type(password, "secret99");
+    expect(password).toHaveValue("secret99");
+
+    await userEvent.click(screen.getByRole("button", { name: "Show password" }));
+    expect(password, "clicking eye should reveal the password").toHaveAttribute(
+      "type",
+      "text",
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(password, "clicking again should hide the password").toHaveAttribute(
+      "type",
+      "password",
+    );
+    expect(registerUserMock, "toggle must not submit the form").not.toHaveBeenCalled();
+  });
+
   it("keeps the helper text visible while an error is shown", async () => {
     registerUserMock.mockRejectedValueOnce(new Error("Email already registered"));
 

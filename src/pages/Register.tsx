@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import type { RegisterCredentials } from "../types/auth";
 import { AuthStatus } from "../types/auth";
+import PasswordInput from "../components/PasswordInput";
 
 const Register = () => {
   const { register, status, error } = useAuth();
@@ -89,14 +90,12 @@ const Register = () => {
             <label className="text-gray-300 text-sm font-medium">
               Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="px-4 py-3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500"
             />
           </div>
 
