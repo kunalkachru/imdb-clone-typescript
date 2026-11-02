@@ -50,6 +50,22 @@ describe("Register page", () => {
     expect(screen.getByTestId("register-helper-text")).toBeInTheDocument();
   });
 
+  it("toggles the typed password between hidden and visible", async () => {
+    renderRegisterFlow();
+
+    const passwordInput = screen.getByPlaceholderText("••••••••");
+    await userEvent.type(passwordInput, "password123");
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    await userEvent.click(screen.getByRole("button", { name: "Show password" }));
+    expect(screen.getByPlaceholderText("••••••••")).toHaveAttribute("type", "text");
+    expect(screen.getByPlaceholderText("••••••••")).toHaveValue("password123");
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(screen.getByPlaceholderText("••••••••")).toHaveAttribute("type", "password");
+    expect(screen.getByPlaceholderText("••••••••")).toHaveValue("password123");
+  });
+
   it("navigates home on successful registration", async () => {
     registerUserMock.mockResolvedValueOnce({
       user: { id: 3, name: "John", email: "john@example.com", createdAt: "now" },

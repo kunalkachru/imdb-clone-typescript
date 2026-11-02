@@ -91,6 +91,22 @@ describe("Login page", () => {
     expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
   });
 
+  it("toggles the typed password between hidden and visible", async () => {
+    renderLoginFlow();
+
+    const passwordInput = screen.getByPlaceholderText("••••••••");
+    await userEvent.type(passwordInput, "password123");
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    await userEvent.click(screen.getByRole("button", { name: "Show password" }));
+    expect(screen.getByPlaceholderText("••••••••")).toHaveAttribute("type", "text");
+    expect(screen.getByPlaceholderText("••••••••")).toHaveValue("password123");
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(screen.getByPlaceholderText("••••••••")).toHaveAttribute("type", "password");
+    expect(screen.getByPlaceholderText("••••••••")).toHaveValue("password123");
+  });
+
   it("keeps the helper text visible while an error is shown", async () => {
     loginUserMock.mockRejectedValueOnce(new Error("Invalid email or password"));
 
