@@ -91,6 +91,36 @@ describe("Login page", () => {
     expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
   });
 
+  it("masks the password by default and toggles visibility without submitting", async () => {
+    renderLoginFlow();
+
+    const password = screen.getByPlaceholderText("••••••••");
+    expect(password, "password input should default to type=password").toHaveAttribute(
+      "type",
+      "password",
+    );
+
+    await userEvent.type(password, "secret99");
+    expect(password).toHaveValue("secret99");
+
+    const toggle = screen.getByRole("button", { name: "Show password" });
+    await userEvent.click(toggle);
+    expect(password, "clicking eye should reveal the password").toHaveAttribute(
+      "type",
+      "text",
+    );
+    expect(screen.getByRole("button", { name: "Hide password" })).toBeInTheDocument();
+    expect(loginUserMock, "toggle must not submit the form").not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(password, "clicking again should hide the password").toHaveAttribute(
+      "type",
+      "password",
+    );
+    expect(loginUserMock).not.toHaveBeenCalled();
+    expect(screen.queryByText("Home page")).not.toBeInTheDocument();
+  });
+
   it("keeps the helper text visible while an error is shown", async () => {
     loginUserMock.mockRejectedValueOnce(new Error("Invalid email or password"));
 
