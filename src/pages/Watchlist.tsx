@@ -27,8 +27,8 @@ const Watchlist = () => {
   };
 
   const heading = searchQuery.trim()
-    ? `Results for "${searchQuery}" in Watchlist`
-    : "🎬 My Watchlist";
+    ? `Results for "${searchQuery}" in Watchlist (${filteredMovies.length})`
+    : `🎬 My Watchlist (${watchlist.length})`;
 
   return (
     <div className="bg-gray-900 min-h-screen">
