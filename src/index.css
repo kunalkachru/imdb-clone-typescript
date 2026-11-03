@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* `dark:` utilities apply when the root element has the `dark` class */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

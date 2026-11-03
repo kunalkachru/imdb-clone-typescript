@@ -61,23 +61,23 @@ const MovieDetail = () => {
 
   if (!Number.isFinite(movieId) || movieId <= 0) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <p className="text-red-500 text-2xl">Invalid movie id</p>
+      <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+        <p className="text-red-600 dark:text-red-500 text-2xl">Invalid movie id</p>
       </div>
     );
   }
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <p className="text-white text-2xl animate-pulse">Loading...</p>
+      <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+        <p className="text-gray-900 dark:text-white text-2xl animate-pulse">Loading...</p>
       </div>
     );
 
   if (error)
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <p className="text-red-500 text-2xl">{error}</p>
+      <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+        <p className="text-red-600 dark:text-red-500 text-2xl">{error}</p>
       </div>
     );
 
@@ -104,7 +104,7 @@ const MovieDetail = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Backdrop */}
       <div className="relative h-96 w-full">
         <img
@@ -113,7 +113,7 @@ const MovieDetail = () => {
           className="w-full h-full object-cover"
         />
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/50 to-transparent dark:from-gray-900 dark:via-gray-900/50" />
 
         {/* Back button */}
         <button
@@ -136,27 +136,27 @@ const MovieDetail = () => {
 
           {/* Info */}
           <div className="flex flex-col justify-end pb-4">
-            <h1 className="text-white text-4xl font-black mb-2">
+            <h1 className="text-gray-900 dark:text-white text-4xl font-black mb-2">
               {movie.title}
             </h1>
 
             {/* TS LESSON: optional chaining on optional fields */}
             {movie.tagline && (
-              <p className="text-gray-400 text-lg italic mb-4">
+              <p className="text-gray-600 dark:text-gray-400 text-lg italic mb-4">
                 "{movie.tagline}"
               </p>
             )}
 
             <div className="flex gap-4 mb-4">
-              <span className="text-yellow-400 font-bold text-xl">
+              <span className="text-yellow-600 dark:text-yellow-400 font-bold text-xl">
                 ⭐ {movie.vote_average.toFixed(1)}
               </span>
-              <span className="text-gray-300">
+              <span className="text-gray-700 dark:text-gray-300">
                 {movie.release_date?.split("-")[0]}
               </span>
               {/* TS LESSON: optional field — runtime might not exist */}
               {movie.runtime && (
-                <span className="text-gray-300">{movie.runtime} min</span>
+                <span className="text-gray-700 dark:text-gray-300">{movie.runtime} min</span>
               )}
             </div>
 
@@ -166,7 +166,7 @@ const MovieDetail = () => {
                 {movie.genres.map((genre_item) => (
                   <span
                     key={genre_item.id}
-                    className="px-3 py-1 bg-yellow-400/20 text-yellow-400 rounded-full text-sm font-medium"
+                    className="px-3 py-1 bg-yellow-400/20 text-yellow-700 dark:text-yellow-400 rounded-full text-sm font-medium"
                   >
                     {genre_item.name}
                   </span>
@@ -174,7 +174,7 @@ const MovieDetail = () => {
               </div>
             )}
 
-            <p className="text-gray-300 text-base leading-relaxed max-w-2xl">
+            <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed max-w-2xl">
               {movie.overview}
             </p>
             {/* Watchlist Button — changes based on alreadyAdded */}
@@ -202,14 +202,14 @@ const MovieDetail = () => {
           ) : (
             <>
               {!isSurveyExpanded && (
-                <div className="rounded-2xl border border-gray-700 bg-gray-800/70 p-6 shadow-xl">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-yellow-400">
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800/70">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
                     Audience Feedback
                   </p>
-                  <h2 className="mt-2 text-3xl font-black text-white">
+                  <h2 className="mt-2 text-3xl font-black text-gray-900 dark:text-white">
                     Add your survey response
                   </h2>
-                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-400">
+                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                     Capture structured feedback for this movie with multiple ratings,
                     recommendation intent, viewing context, and freeform comments.
                   </p>

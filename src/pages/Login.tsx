@@ -38,19 +38,19 @@ const Login = () => {
   const isLoading = status === AuthStatus.LOADING;
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-yellow-400 text-3xl font-black mb-2">
+          <h1 className="text-yellow-600 dark:text-yellow-400 text-3xl font-black mb-2">
             🎬 IMDBClone
           </h1>
-          <p className="text-gray-400">Sign in to your account</p>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to your account</p>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 dark:bg-red-500/20 border border-red-500 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
@@ -59,7 +59,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Email */}
           <div className="flex flex-col gap-1">
-            <label className="text-gray-300 text-sm font-medium">Email</label>
+            <label className="text-gray-700 dark:text-gray-300 text-sm font-medium">Email</label>
             <input
               type="email"
               name="email"
@@ -67,13 +67,13 @@ const Login = () => {
               onChange={handleChange}
               placeholder="john@example.com"
               required
-              className="px-4 py-3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500"
+              className="px-4 py-3 bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
 
           {/* Password */}
           <div className="flex flex-col gap-1">
-            <label className="text-gray-300 text-sm font-medium">
+            <label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
               Password
             </label>
             <PasswordInput
@@ -98,18 +98,18 @@ const Login = () => {
         {/* Helper text */}
         <p
           data-testid="login-helper-text"
-          className="text-gray-400 text-sm text-center mt-4"
+          className="text-gray-600 dark:text-gray-400 text-sm text-center mt-4"
         >
           Demo only: sign-in uses local mock accounts in your browser, and your
           watchlist is available after you sign in.
         </p>
 
         {/* Register link */}
-        <p className="text-gray-400 text-center mt-6">
+        <p className="text-gray-600 dark:text-gray-400 text-center mt-6">
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-yellow-400 hover:underline font-medium"
+            className="text-yellow-600 dark:text-yellow-400 hover:underline font-medium"
           >
             Register
           </Link>
