@@ -18,14 +18,14 @@ const PasswordInput = ({ className = "", ...inputProps }: PasswordInputProps) =>
       <input
         {...inputProps}
         type={visible ? "text" : "password"}
-        className={`w-full pl-4 pr-12 py-3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500 ${className}`}
+        className={`w-full pl-4 pr-12 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-transparent rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500 ${className}`}
       />
       <button
         type="button"
         aria-label={label}
         aria-pressed={visible}
         onClick={() => setVisible((prev) => !prev)}
-        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded"
+        className="absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded"
       >
         {visible ? (
           // eye-off icon

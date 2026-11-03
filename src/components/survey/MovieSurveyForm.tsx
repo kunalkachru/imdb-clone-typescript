@@ -105,16 +105,16 @@ const MovieSurveyForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-gray-700 bg-gray-800/80 p-6 shadow-xl"
+      className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 p-6 shadow-xl"
     >
       <div className="mb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-yellow-400">
+        <p className="text-sm font-semibold uppercase tracking-wide text-yellow-600 dark:text-yellow-400">
           Audience Feedback
         </p>
-        <h3 className="mt-2 text-2xl font-bold text-white">
+        <h3 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
           Share your survey response
         </h3>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
           Rate the movie across multiple dimensions and add short freeform feedback
           that can later power analytics and dashboards.
         </p>
@@ -167,18 +167,18 @@ const MovieSurveyForm = ({
       </div>
 
       {Object.values(errors).some(Boolean) && (
-        <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           Please review the highlighted survey fields before submitting.
         </div>
       )}
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-white">Would recommend</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">Would recommend</span>
           <select
             value={formData.wouldRecommend ? "yes" : "no"}
             onChange={(e) => updateField("wouldRecommend", e.target.value === "yes")}
-            className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+            className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           >
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -186,11 +186,11 @@ const MovieSurveyForm = ({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-white">Watch context</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">Watch context</span>
           <select
             value={formData.watchContext}
             onChange={(e) => updateField("watchContext", e.target.value as MovieSurveyFormData["watchContext"])}
-            className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+            className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           >
             {surveyWatchContextOptions.map((option) => (
               <option key={option} value={option}>
@@ -201,7 +201,7 @@ const MovieSurveyForm = ({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-white">Discovery source</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">Discovery source</span>
           <select
             value={formData.discoverySource}
             onChange={(e) =>
@@ -210,7 +210,7 @@ const MovieSurveyForm = ({
                 e.target.value as MovieSurveyFormData["discoverySource"],
               )
             }
-            className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+            className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           >
             {surveyDiscoverySourceOptions.map((option) => (
               <option key={option} value={option}>
@@ -222,13 +222,13 @@ const MovieSurveyForm = ({
       </div>
 
       <label className="mt-4 flex flex-col gap-2">
-        <span className="text-sm font-semibold text-white">Overall sentiment</span>
+        <span className="text-sm font-semibold text-gray-900 dark:text-white">Overall sentiment</span>
         <select
           value={formData.sentimentTag}
           onChange={(e) =>
             updateField("sentimentTag", e.target.value as MovieSurveyFormData["sentimentTag"])
           }
-          className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+          className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
         >
           {surveySentimentOptions.map((option) => (
             <option key={option} value={option}>
@@ -240,13 +240,13 @@ const MovieSurveyForm = ({
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-white">What worked well?</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">What worked well?</span>
           <textarea
             value={formData.whatWorkedWell}
             onChange={(e) => updateField("whatWorkedWell", e.target.value)}
             rows={5}
             placeholder="Highlight the strongest parts of the movie experience."
-            className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+            className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           />
           {errors.whatWorkedWell && (
             <span className="text-sm text-red-400">{errors.whatWorkedWell}</span>
@@ -254,13 +254,13 @@ const MovieSurveyForm = ({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-white">What could be better?</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">What could be better?</span>
           <textarea
             value={formData.whatCouldBeBetter}
             onChange={(e) => updateField("whatCouldBeBetter", e.target.value)}
             rows={5}
             placeholder="Call out moments that felt weak, confusing, or disappointing."
-            className="rounded-lg bg-gray-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-yellow-400"
+            className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           />
           {errors.whatCouldBeBetter && (
             <span className="text-sm text-red-400">{errors.whatCouldBeBetter}</span>
@@ -269,7 +269,7 @@ const MovieSurveyForm = ({
       </div>
 
       {submitError && (
-        <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           {submitError}
         </div>
       )}
@@ -287,7 +287,7 @@ const MovieSurveyForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-gray-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-gray-700"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-3 font-semibold text-gray-800 dark:text-white transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             Cancel
           </button>
