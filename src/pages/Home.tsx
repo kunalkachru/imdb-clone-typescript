@@ -114,7 +114,7 @@ const Home = () => {
   const canResetFilters = hasSearched || hasGenreFilter;
 
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={(val: string) => {
@@ -130,11 +130,11 @@ const Home = () => {
 
       <div className="p-8">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <h1 className="text-white text-4xl font-bold">{heading}</h1>
+          <h1 className="text-gray-900 dark:text-white text-4xl font-bold">{heading}</h1>
           <div className="w-full max-w-sm space-y-3">
             <label
               htmlFor="genre-filter"
-              className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-400"
+              className="mb-2 block text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400"
             >
               Browse by genre
             </label>
@@ -151,7 +151,7 @@ const Home = () => {
                   nextPage: 1,
                 });
               }}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 focus:border-yellow-400 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-yellow-400 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="">All genres (trending)</option>
               {(genresData?.genres ?? []).map((genre) => (
@@ -169,7 +169,7 @@ const Home = () => {
                 setSearchParams(new URLSearchParams());
               }}
               disabled={!canResetFilters}
-              className="w-full rounded-lg border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-200"
             >
               Clear filters
             </button>
@@ -178,18 +178,18 @@ const Home = () => {
 
         {loading && (
           <div className="flex justify-center items-center h-64">
-            <p className="text-white text-2xl animate-pulse">Loading...</p>
+            <p className="text-gray-900 dark:text-white text-2xl animate-pulse">Loading...</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 dark:bg-red-500/20 border border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
         {!loading && !error && movies.length === 0 && (
-          <div className="text-gray-300 text-lg">No movies found.</div>
+          <div className="text-gray-600 dark:text-gray-300 text-lg">No movies found.</div>
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -197,7 +197,7 @@ const Home = () => {
             <div
               key={movie.id}
               onClick={() => navigate(`/movie/${movie.id}`)}
-              className="bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer"
+              className="bg-white shadow dark:bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer"
             >
               <img
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
@@ -205,10 +205,10 @@ const Home = () => {
                 className="w-full object-cover"
               />
               <div className="p-3">
-                <h2 className="text-white font-semibold text-sm truncate">
+                <h2 className="text-gray-900 dark:text-white font-semibold text-sm truncate">
                   {formatMovieTitle(movie.title, movie.release_date)}
                 </h2>
-                <p className="text-yellow-400 text-sm mt-1">
+                <p className="text-yellow-600 dark:text-yellow-400 text-sm mt-1">
                   ⭐ {movie.vote_average.toFixed(1)}
                 </p>
               </div>
@@ -221,11 +221,11 @@ const Home = () => {
             <button
               onClick={() => goToPage(activePage - 1)}
               disabled={activePage <= 1}
-              className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-200"
             >
               Previous
             </button>
-            <p className="text-sm font-semibold text-gray-300">
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
               Page {activePage} of {totalPages}
             </p>
             <div className="flex items-center gap-2">
@@ -237,7 +237,7 @@ const Home = () => {
                   className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
                     page === activePage
                       ? "border-yellow-400 bg-yellow-400 text-black"
-                      : "border-gray-700 text-gray-200"
+                      : "border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-200"
                   }`}
                 >
                   {page}
@@ -247,7 +247,7 @@ const Home = () => {
             <button
               onClick={() => goToPage(activePage + 1)}
               disabled={activePage >= totalPages}
-              className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-200"
             >
               Next
             </button>

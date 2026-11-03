@@ -31,7 +31,7 @@ const Watchlist = () => {
     : `🎬 My Watchlist (${watchlist.length})`;
 
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={(val: string) => setSearchQuery(val)}
@@ -42,7 +42,7 @@ const Watchlist = () => {
       <div className="max-w-6xl mx-auto p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-white text-4xl font-black">{heading}</h1>
+          <h1 className="text-gray-900 dark:text-white text-4xl font-black">{heading}</h1>
           {watchlist.length > 0 && (
             <button
               onClick={() => dispatch({ type: "CLEAR" })}
@@ -56,12 +56,12 @@ const Watchlist = () => {
         {/* Empty watchlist */}
         {watchlist.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[16rem] px-4 gap-4 text-center">
-            <p className="text-gray-400 text-xl">
+            <p className="text-gray-600 dark:text-gray-400 text-xl">
               No movies in your watchlist yet
             </p>
             <p
               data-testid="watchlist-empty-guidance"
-              className="text-gray-400 text-base max-w-md text-center"
+              className="text-gray-600 dark:text-gray-400 text-base max-w-md text-center"
             >
               Signed-in users can save films to their watchlist from any movie page.
             </p>
@@ -77,7 +77,7 @@ const Watchlist = () => {
         {/* No search results */}
         {watchlist.length > 0 && filteredMovies.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
-            <p role="status" className="text-gray-400 text-xl">
+            <p role="status" className="text-gray-600 dark:text-gray-400 text-xl">
               No movies match "{searchQuery}"
             </p>
             <button
@@ -97,7 +97,7 @@ const Watchlist = () => {
           {filteredMovies.map((movie: Movie) => (
             <div
               key={movie.id}
-              className="bg-gray-800 rounded-lg overflow-hidden group relative"
+              className="bg-white shadow dark:bg-gray-800 rounded-lg overflow-hidden group relative"
             >
               <div
                 onClick={() => navigate(`/movie/${movie.id}`)}
@@ -109,10 +109,10 @@ const Watchlist = () => {
                   className="w-full object-cover"
                 />
                 <div className="p-3">
-                  <h2 className="text-white font-semibold text-sm truncate">
+                  <h2 className="text-gray-900 dark:text-white font-semibold text-sm truncate">
                     {formatMovieTitle(movie.title, movie.release_date)}
                   </h2>
-                  <p className="text-yellow-400 text-sm mt-1">
+                  <p className="text-yellow-600 dark:text-yellow-400 text-sm mt-1">
                     ⭐ {movie.vote_average.toFixed(1)}
                   </p>
                 </div>
