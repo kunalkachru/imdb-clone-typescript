@@ -33,7 +33,7 @@ const MovieSurveySummary = ({ survey, onEdit }: MovieSurveySummaryProps) => {
       </div>
 
       <div className="mt-5 grid gap-3 text-sm text-gray-700 dark:text-gray-200 md:grid-cols-2">
-        <div className="rounded-xl bg-gray-900/70 p-4">
+        <div className="rounded-xl bg-gray-100 dark:bg-gray-900/70 p-4">
           <p className="font-semibold text-gray-900 dark:text-white">Recommendation</p>
           <p className="mt-1">{survey.wouldRecommend ? "Would recommend" : "Would not recommend"}</p>
         </div>

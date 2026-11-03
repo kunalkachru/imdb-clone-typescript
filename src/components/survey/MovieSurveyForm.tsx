@@ -249,7 +249,7 @@ const MovieSurveyForm = ({
             className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           />
           {errors.whatWorkedWell && (
-            <span className="text-sm text-red-400">{errors.whatWorkedWell}</span>
+            <span className="text-sm text-red-600 dark:text-red-400">{errors.whatWorkedWell}</span>
           )}
         </label>
 
@@ -263,7 +263,7 @@ const MovieSurveyForm = ({
             className="rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-transparent px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-yellow-400"
           />
           {errors.whatCouldBeBetter && (
-            <span className="text-sm text-red-400">{errors.whatCouldBeBetter}</span>
+            <span className="text-sm text-red-600 dark:text-red-400">{errors.whatCouldBeBetter}</span>
           )}
         </label>
       </div>
