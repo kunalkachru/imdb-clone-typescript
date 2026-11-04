@@ -29,6 +29,43 @@ describe("Navbar", () => {
     expect(screen.getByRole("link", { name: "Login" })).toBeInTheDocument();
   });
 
+  it("shows the Actors link alongside Home and Watchlist for guests", () => {
+    render(
+      <AuthContext.Provider value={baseAuthValue}>
+        <MemoryRouter>
+          <Navbar searchQuery="" onSearchChange={vi.fn()} onSearch={vi.fn()} />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const actors = screen.getByRole("link", { name: "Actors" });
+    expect(actors.getAttribute("href")).toMatch(/\/actors$/);
+    expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Watchlist" })).toBeInTheDocument();
+  });
+
+  it("shows the Actors link for authenticated users", () => {
+    render(
+      <AuthContext.Provider
+        value={{
+          ...baseAuthValue,
+          user: { id: 1, name: "John", email: "john@example.com", createdAt: "now" },
+          token: "token",
+          status: "success",
+        }}
+      >
+        <MemoryRouter>
+          <Navbar searchQuery="" onSearchChange={vi.fn()} onSearch={vi.fn()} />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const actors = screen.getByRole("link", { name: "Actors" });
+    expect(actors.getAttribute("href")).toMatch(/\/actors$/);
+    expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Watchlist" })).toBeInTheDocument();
+  });
+
   it("shows user and logout for authenticated users", async () => {
     const logout = vi.fn();
 
