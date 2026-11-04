@@ -4,7 +4,8 @@ import type { Person } from "../types/person";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
-const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+const BASE_URL =
+  import.meta.env.VITE_TMDB_BASE_URL || "https://api.themoviedb.org/3";
 
 const headers: HeadersInit = {
   Authorization: `Bearer ${TOKEN}`,
