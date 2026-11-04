@@ -4,8 +4,7 @@ import type { Person } from "../types/person";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
-const BASE_URL =
-  import.meta.env.VITE_TMDB_BASE_URL || "https://api.themoviedb.org/3";
+const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL ?? "";
 
 const headers: HeadersInit = {
   Authorization: `Bearer ${TOKEN}`,
@@ -16,12 +15,11 @@ const headers: HeadersInit = {
 // Instead of writing fetchMovies(), fetchMovieDetail() etc separately,
 // one generic function handles ALL API calls and returns the right type
 async function fetchFromTMDB<T>(endpoint: string): Promise<T> {
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  if (API_KEY) {
-    url.searchParams.set("api_key", API_KEY);
-  }
+  const apiKeyParam = API_KEY
+    ? `${endpoint.includes("?") ? "&" : "?"}api_key=${encodeURIComponent(API_KEY)}`
+    : "";
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(`${BASE_URL}${endpoint}${apiKeyParam}`, {
     headers,
   });
   if (!response.ok) {
