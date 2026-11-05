@@ -4,6 +4,8 @@ import { useAuth } from "../hooks/useAuth";
 import type { RegisterCredentials } from "../types/auth";
 import { AuthStatus } from "../types/auth";
 import PasswordInput from "../components/PasswordInput";
+import StrengthMeter from "../components/StrengthMeter";
+import { checkPasswordRules } from "../utils/passwordRules";
 
 const Register = () => {
   const { register, status, error } = useAuth();
@@ -16,6 +18,7 @@ const Register = () => {
     email: "",
     password: "",
   });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,6 +30,12 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const rules = checkPasswordRules(formData.password);
+    if (!rules.ok) {
+      setPasswordError(`Password needs ${rules.failures.join(", ")}.`);
+      return;
+    }
+    setPasswordError(null);
     const isSuccess = await register(formData);
     if (isSuccess) {
       navigate("/");
@@ -97,6 +106,12 @@ const Register = () => {
               placeholder="••••••••"
               required
             />
+            <StrengthMeter value={formData.password} />
+            {passwordError && (
+              <p role="alert" className="text-red-400 text-sm">
+                {passwordError}
+              </p>
+            )}
           </div>
 
           {/* Submit */}
