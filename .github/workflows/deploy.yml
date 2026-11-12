@@ -68,12 +68,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { data } = await github.rest.actions.listSelfHostedRunnersForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            const hasOnlineRunner = data.runners.some((runner) => runner.status === "online");
-            core.setOutput("has_runner", hasOnlineRunner ? "true" : "false");
+            try {
+              const { data } = await github.rest.actions.listSelfHostedRunnersForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              const hasOnlineRunner = data.runners.some((runner) => runner.status === "online");
+              core.setOutput("has_runner", hasOnlineRunner ? "true" : "false");
+            } catch (error) {
+              core.notice(`Cannot list self-hosted runners (${error.message}); skipping local deploy.`);
+              core.setOutput("has_runner", "false");
+            }
 
   deploy-local:
     needs: [quality, detect-local-runner]
