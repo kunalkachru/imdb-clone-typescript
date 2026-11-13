@@ -10,8 +10,7 @@
 
 ## Decisions, gotchas, what failed and why
 - T1 touched files outside its list: src/App.css, src/App.tsx, src/components/Footer.tsx
-- (none yet)
 
 ## Tasks
-- [ ] T1 Add the shared footer to the application route shell
+- [x] T1 Add the shared footer to the application route shell (a601f1a)
 - [ ] T2 Add route-shell regression coverage for rendering and navigation
