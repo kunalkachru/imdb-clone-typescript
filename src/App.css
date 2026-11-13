@@ -5,6 +5,22 @@
   text-align: center;
 }
 
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+}
+
+.app-shell > footer {
+  padding: 1rem 2rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
