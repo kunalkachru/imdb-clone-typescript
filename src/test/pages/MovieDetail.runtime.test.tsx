@@ -50,6 +50,35 @@ describe("MovieDetail runtime", () => {
     expect(screen.queryByText(/ min$/)).not.toBeInTheDocument();
   });
 
+  it("omits runtime when runtime is null", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Null Runtime",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2020-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [],
+        runtime: null,
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText("min")).not.toBeInTheDocument();
+  });
+
   it("renders known runtime with min suffix", () => {
     mockUseFetch.mockReturnValue({
       data: {
