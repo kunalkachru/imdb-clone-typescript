@@ -21,7 +21,7 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail runtime", () => {
-  it("omits runtime when runtime is unknown", () => {
+  it("reproduces the undefined runtime text when runtime is unknown", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
