@@ -46,6 +46,65 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("undefined min")).toBeInTheDocument();
+    expect(screen.queryByText("undefined min")).not.toBeInTheDocument();
+    expect(screen.queryByText(/ min$/)).not.toBeInTheDocument();
+  });
+
+  it("renders the runtime when it is known", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Known Runtime",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2020-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [],
+        runtime: 142,
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("142 min")).toBeInTheDocument();
+  });
+
+  it("renders zero minutes when runtime is zero", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Zero Runtime",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2020-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [],
+        runtime: 0,
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("0 min")).toBeInTheDocument();
   });
 });

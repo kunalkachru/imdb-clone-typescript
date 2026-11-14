@@ -155,7 +155,7 @@ const MovieDetail = () => {
                 {movie.release_date?.split("-")[0]}
               </span>
               {/* TS LESSON: optional field — runtime might not exist */}
-              {movie.runtime && (
+              {movie.runtime !== undefined && (
                 <span className="text-gray-300">{movie.runtime} min</span>
               )}
             </div>
