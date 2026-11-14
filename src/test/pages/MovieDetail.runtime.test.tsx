@@ -21,7 +21,7 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail runtime", () => {
-  it("reproduces the undefined runtime text when runtime is unknown", () => {
+  it("omits runtime when runtime is unknown", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -50,7 +50,7 @@ describe("MovieDetail runtime", () => {
     expect(screen.queryByText(/ min$/)).not.toBeInTheDocument();
   });
 
-  it("renders the runtime when it is known", () => {
+  it("renders known runtime with min suffix", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -79,7 +79,7 @@ describe("MovieDetail runtime", () => {
     expect(screen.getByText("142 min")).toBeInTheDocument();
   });
 
-  it("renders zero minutes when runtime is zero", () => {
+  it("renders zero runtime with min suffix", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
