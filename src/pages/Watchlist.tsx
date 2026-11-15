@@ -1,9 +1,21 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWatchlist } from "../hooks/useWatchlist";
 import type { Movie } from "../types/movie";
 import Navbar from "../components/Navbar";
 import { formatMovieTitle } from "../utils/formatMovieTitle";
+
+const WATCHLIST_SORT_KEY = "watchlist-sort";
+const SORT_OPTIONS = ["recently-added", "title", "rating"] as const;
+type WatchlistSort = (typeof SORT_OPTIONS)[number];
+
+const isWatchlistSort = (value: string | null): value is WatchlistSort =>
+  SORT_OPTIONS.includes(value as WatchlistSort);
+
+const getStoredSort = (): WatchlistSort => {
+  const storedSort = localStorage.getItem(WATCHLIST_SORT_KEY);
+  return isWatchlistSort(storedSort) ? storedSort : "recently-added";
+};
 
 const Watchlist = () => {
   const navigate = useNavigate();
@@ -11,15 +23,30 @@ const Watchlist = () => {
 
   // TS LESSON: local search state — filters watchlist only
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sort, setSort] = useState<WatchlistSort>(getStoredSort);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const sortedWatchlist = useMemo(() => {
+    const newestFirst = [...watchlist].reverse();
+
+    if (sort === "recently-added") {
+      return newestFirst;
+    }
+
+    return newestFirst.sort((left, right) =>
+      sort === "title"
+        ? left.title.localeCompare(right.title)
+        : right.vote_average - left.vote_average,
+    );
+  }, [sort, watchlist]);
 
   // TS LESSON: derived state — filter movies based on searchQuery
   // no API call needed — just filter existing array
   const filteredMovies: Movie[] = searchQuery.trim()
-    ? watchlist.filter((movie: Movie) =>
+    ? sortedWatchlist.filter((movie: Movie) =>
         movie.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-    : watchlist; // no search — show all
+    : sortedWatchlist; // no search — show all
 
   const handleSearch = () => {
     // search happens live as user types — nothing extra needed here
@@ -52,6 +79,28 @@ const Watchlist = () => {
             </button>
           )}
         </div>
+
+        {watchlist.length > 0 && (
+          <div className="mb-8">
+            <label htmlFor="watchlist-sort" className="text-white font-semibold mr-3">
+              Sort watchlist
+            </label>
+            <select
+              id="watchlist-sort"
+              value={sort}
+              onChange={(event) => {
+                const nextSort = event.target.value as WatchlistSort;
+                setSort(nextSort);
+                localStorage.setItem(WATCHLIST_SORT_KEY, nextSort);
+              }}
+              className="px-4 py-2 rounded-lg bg-gray-700 text-white"
+            >
+              <option value="recently-added">Recently added</option>
+              <option value="title">Title A to Z</option>
+              <option value="rating">Rating highest first</option>
+            </select>
+          </div>
+        )}
 
         {/* Empty watchlist */}
         {watchlist.length === 0 && (

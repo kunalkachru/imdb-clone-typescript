@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Watchlist from "../../pages/Watchlist";
 import { WatchlistContext } from "../../context/WatchlistContextDef";
@@ -30,6 +30,12 @@ const movie = {
   genre_ids: [1],
 };
 
+const movies = [
+  { ...movie, id: 1, title: "Bravo", vote_average: 7.5 },
+  { ...movie, id: 2, title: "Alpha", vote_average: 9.2 },
+  { ...movie, id: 3, title: "Charlie", vote_average: 8.1 },
+];
+
 const renderWithContext = (watchlistContext: WatchlistContextType) =>
   render(
     <AuthContext.Provider value={authValue}>
@@ -42,6 +48,10 @@ const renderWithContext = (watchlistContext: WatchlistContextType) =>
   );
 
 describe("Watchlist page", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("renders empty state", () => {
     renderWithContext({
       watchlist: [],
@@ -153,8 +163,8 @@ describe("Watchlist page", () => {
     });
 
     const headings = screen.getAllByRole("heading", { level: 2 });
-    expect(headings[0].textContent).toBe(`Inception (${year})`);
-    expect(headings[1].textContent).toBe("Untitled Project");
+    expect(headings[0].textContent).toBe("Untitled Project");
+    expect(headings[1].textContent).toBe(`Inception (${year})`);
     expect(screen.getByRole("img", { name: "Inception" })).toBeInTheDocument();
   });
 
@@ -253,5 +263,94 @@ describe("Watchlist page", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText(/No movies match/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
+  });
+
+  it("renders the sort dropdown with Recently added selected by default", () => {
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    const sort = screen.getByRole("combobox", { name: "Sort watchlist" });
+    expect(sort).toHaveValue("recently-added");
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Recently added",
+      "Title A to Z",
+      "Rating highest first",
+    ]);
+  });
+
+  it("renders Recently added movies in newest-first insertion order", () => {
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Charlie (2010)",
+      "Alpha (2010)",
+      "Bravo (2010)",
+    ]);
+  });
+
+  it("renders movies in title A to Z order with recent order as the tie-breaker", async () => {
+    const tiedTitleMovies = [
+      { ...movies[0], title: "Same" },
+      { ...movies[1], title: "Alpha" },
+      { ...movies[2], title: "Same" },
+    ];
+    renderWithContext({ watchlist: tiedTitleMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "title");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alpha (2010)",
+      "Same (2010)",
+      "Same (2010)",
+    ]);
+  });
+
+  it("renders movies in rating highest first order with recent order as the tie-breaker", async () => {
+    const tiedRatingMovies = [
+      { ...movies[0], vote_average: 8.1 },
+      { ...movies[1], vote_average: 9.2 },
+      { ...movies[2], vote_average: 8.1 },
+    ];
+    renderWithContext({ watchlist: tiedRatingMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "rating");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alpha (2010)",
+      "Charlie (2010)",
+      "Bravo (2010)",
+    ]);
+  });
+
+  it("remembers the selected sort and restores its movie order after reload", async () => {
+    const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "rating");
+
+    expect(localStorage.getItem("watchlist-sort")).toBe("rating");
+    view.unmount();
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("rating");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alpha (2010)",
+      "Charlie (2010)",
+      "Bravo (2010)",
+    ]);
+  });
+
+  it("falls back to Recently added for a missing or invalid stored sort", () => {
+    localStorage.setItem("watchlist-sort", "not-a-sort");
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("recently-added");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Charlie (2010)",
+      "Alpha (2010)",
+      "Bravo (2010)",
+    ]);
+  });
+
+  it("hides the sort dropdown when the watchlist is empty", () => {
+    renderWithContext({ watchlist: [], dispatch: vi.fn(), isInWatchlist: () => false });
+
+    expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
+    expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
   });
 });
