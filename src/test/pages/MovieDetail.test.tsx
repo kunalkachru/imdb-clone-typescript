@@ -78,6 +78,44 @@ describe("MovieDetail page", () => {
     });
   });
 
+  it("renders movie detail and dispatches remove from watchlist", async () => {
+    mockIsInWatchlist.mockReturnValue(true);
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [1],
+        genres: [{ id: 1, name: "Action" }],
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Inception")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "❌ Remove from Watchlist" }),
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "REMOVE_MOVIE",
+      payload: 1,
+    });
+  });
+
   it("submits survey feedback and shows minimized summary", async () => {
     mockIsInWatchlist.mockReturnValue(false);
     mockUseFetch.mockReturnValue({
