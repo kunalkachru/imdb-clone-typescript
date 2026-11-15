@@ -277,7 +277,9 @@ describe("Watchlist page", () => {
     ]);
   });
 
-  it("renders Recently added movies in newest-first insertion order", () => {
+  it("sorts movies by recently added order without changing persisted movie records", () => {
+    const persistedMovies = [...movies];
+    localStorage.setItem("watchlist:1", JSON.stringify(persistedMovies));
     renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
@@ -285,9 +287,10 @@ describe("Watchlist page", () => {
       "Alpha (2010)",
       "Bravo (2010)",
     ]);
+    expect(JSON.parse(localStorage.getItem("watchlist:1")!)).toEqual(persistedMovies);
   });
 
-  it("renders movies in title A to Z order with recent order as the tie-breaker", async () => {
+  it("sorts movies by title A to Z with recently added tie-breakers", async () => {
     const tiedTitleMovies = [
       { ...movies[0], title: "Same" },
       { ...movies[1], title: "Alpha" },
@@ -303,7 +306,7 @@ describe("Watchlist page", () => {
     ]);
   });
 
-  it("renders movies in rating highest first order with recent order as the tie-breaker", async () => {
+  it("sorts movies by rating highest first with recently added tie-breakers", async () => {
     const tiedRatingMovies = [
       { ...movies[0], vote_average: 8.1 },
       { ...movies[1], vote_average: 9.2 },
@@ -319,7 +322,7 @@ describe("Watchlist page", () => {
     ]);
   });
 
-  it("remembers the selected sort and restores its movie order after reload", async () => {
+  it("persists the selected sort and restores it after reload", async () => {
     const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "rating");
 
@@ -335,9 +338,8 @@ describe("Watchlist page", () => {
     ]);
   });
 
-  it("falls back to Recently added for a missing or invalid stored sort", () => {
-    localStorage.setItem("watchlist-sort", "not-a-sort");
-    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+  it("falls back to Recently added for missing or invalid stored sort values", () => {
+    const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
     expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("recently-added");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
@@ -345,9 +347,15 @@ describe("Watchlist page", () => {
       "Alpha (2010)",
       "Bravo (2010)",
     ]);
+
+    view.unmount();
+    localStorage.setItem("watchlist-sort", "not-a-sort");
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("recently-added");
   });
 
-  it("hides the sort dropdown when the watchlist is empty", () => {
+  it("hides the sort dropdown for an empty watchlist", () => {
     renderWithContext({ watchlist: [], dispatch: vi.fn(), isInWatchlist: () => false });
 
     expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
