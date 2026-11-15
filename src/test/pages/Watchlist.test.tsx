@@ -361,4 +361,5 @@ describe("Watchlist page", () => {
     expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
   });
+
 });

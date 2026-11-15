@@ -13,8 +13,12 @@ const isWatchlistSort = (value: string | null): value is WatchlistSort =>
   SORT_OPTIONS.includes(value as WatchlistSort);
 
 const getStoredSort = (): WatchlistSort => {
-  const storedSort = localStorage.getItem(WATCHLIST_SORT_KEY);
-  return isWatchlistSort(storedSort) ? storedSort : "recently-added";
+  try {
+    const storedSort = localStorage.getItem(WATCHLIST_SORT_KEY);
+    return isWatchlistSort(storedSort) ? storedSort : "recently-added";
+  } catch {
+    return "recently-added";
+  }
 };
 
 const Watchlist = () => {
@@ -91,7 +95,11 @@ const Watchlist = () => {
               onChange={(event) => {
                 const nextSort = event.target.value as WatchlistSort;
                 setSort(nextSort);
-                localStorage.setItem(WATCHLIST_SORT_KEY, nextSort);
+                try {
+                  localStorage.setItem(WATCHLIST_SORT_KEY, nextSort);
+                } catch {
+                  // Sorting remains available for this session if storage is unavailable.
+                }
               }}
               className="px-4 py-2 rounded-lg bg-gray-700 text-white"
             >
