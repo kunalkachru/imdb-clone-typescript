@@ -163,7 +163,7 @@ const MovieDetail = () => {
                 {movie.release_date?.split("-")[0]}
               </span>
               {/* TS LESSON: optional field — runtime might not exist */}
-              {movie.runtime != null && (
+              {movie.runtime != null && movie.runtime > 0 && (
                 <span className="text-gray-300">{formatRuntime(movie.runtime)}</span>
               )}
             </div>
