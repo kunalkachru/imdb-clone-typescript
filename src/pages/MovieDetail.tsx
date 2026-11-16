@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { getMovieDetail } from "../services/tmdb";
 import type { Movie, MovieDetail as MovieDetailType } from "../types/movie";
+import { formatMovieTitle } from "../utils/formatMovieTitle";
 import { useWatchlist } from "../hooks/useWatchlist";
 import { useAuth } from "../hooks/useAuth";
 import { getMovieSurvey } from "../services/survey";
@@ -137,7 +138,7 @@ const MovieDetail = () => {
           {/* Info */}
           <div className="flex flex-col justify-end pb-4">
             <h1 className="text-white text-4xl font-black mb-2">
-              {movie.title}
+              {formatMovieTitle(movie.title, movie.release_date)}
             </h1>
 
             {/* TS LESSON: optional chaining on optional fields */}

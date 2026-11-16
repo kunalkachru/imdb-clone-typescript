@@ -68,7 +68,7 @@ describe("MovieDetail page", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     expect(screen.getByText("Audience Snapshot")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "➕ Add to Watchlist" }));
 
@@ -76,6 +76,67 @@ describe("MovieDetail page", () => {
       type: "ADD_MOVIE",
       payload: expect.objectContaining({ id: 1 }),
     });
+  });
+
+  it("renders the movie title with its release year", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [1],
+        genres: [{ id: 1, name: "Action" }],
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Inception (2010)",
+    );
+  });
+
+  it("renders only the movie title when release date is missing", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [1],
+        genres: [{ id: 1, name: "Action" }],
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Inception");
+    expect(heading).not.toHaveTextContent(/[()]/);
   });
 
   it("renders movie detail and dispatches remove from watchlist", async () => {
@@ -105,7 +166,7 @@ describe("MovieDetail page", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     await userEvent.click(
       screen.getByRole("button", { name: "❌ Remove from Watchlist" }),
     );
