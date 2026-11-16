@@ -76,7 +76,7 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("min")).not.toBeInTheDocument();
+    expect(screen.queryByText(/\d+h \d+m|\d+m$/)).not.toBeInTheDocument();
   });
 
   it("renders 135-minute runtime as hours and minutes", () => {
