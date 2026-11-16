@@ -16,6 +16,13 @@ import {
   getAudienceCommentHighlights,
 } from "../services/surveyCommunity";
 
+const formatRuntime = (runtime: number) => {
+  const hours = Math.floor(runtime / 60);
+  const minutes = runtime % 60;
+
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+};
+
 const MovieDetail = () => {
   // TS LESSON: useParams returns Record<string, string | undefined>
   // we destructure and type the id explicitly
@@ -156,8 +163,8 @@ const MovieDetail = () => {
                 {movie.release_date?.split("-")[0]}
               </span>
               {/* TS LESSON: optional field — runtime might not exist */}
-              {movie.runtime != null && (
-                <span className="text-gray-300">{movie.runtime} min</span>
+              {movie.runtime != null && movie.runtime > 0 && (
+                <span className="text-gray-300">{formatRuntime(movie.runtime)}</span>
               )}
             </div>
 

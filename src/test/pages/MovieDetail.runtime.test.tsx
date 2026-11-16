@@ -21,7 +21,7 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail runtime", () => {
-  it("reproduces the undefined runtime text when runtime is unknown", () => {
+  it("omits runtime when runtime is unknown", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -76,10 +76,10 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("min")).not.toBeInTheDocument();
+    expect(screen.queryByText(/\d+h \d+m|\d+m$/)).not.toBeInTheDocument();
   });
 
-  it("renders known runtime with min suffix", () => {
+  it("renders 135-minute runtime as hours and minutes", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -91,7 +91,7 @@ describe("MovieDetail runtime", () => {
         vote_average: 8.4,
         vote_count: 100,
         genre_ids: [],
-        runtime: 142,
+        runtime: 135,
       },
       loading: false,
       error: null,
@@ -105,10 +105,40 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("142 min")).toBeInTheDocument();
+    expect(screen.getByText("2h 15m")).toBeInTheDocument();
+    expect(screen.queryByText("135 min")).not.toBeInTheDocument();
   });
 
-  it("renders zero runtime with min suffix", () => {
+  it("renders 45-minute runtime as minutes only", () => {
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Short Runtime",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2020-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [],
+        runtime: 45,
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("45m")).toBeInTheDocument();
+  });
+
+  it("omits runtime when runtime is zero", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -134,6 +164,6 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("0 min")).toBeInTheDocument();
+    expect(screen.queryByText("0m")).not.toBeInTheDocument();
   });
 });
