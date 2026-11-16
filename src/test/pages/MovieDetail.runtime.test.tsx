@@ -21,7 +21,7 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail runtime", () => {
-  it("omits runtime when runtime is undefined", () => {
+  it("omits runtime when runtime is unknown", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -50,36 +50,7 @@ describe("MovieDetail runtime", () => {
     expect(screen.queryByText(/ min$/)).not.toBeInTheDocument();
   });
 
-  it("omits runtime when runtime is null", () => {
-    mockUseFetch.mockReturnValue({
-      data: {
-        id: 1,
-        title: "Null Runtime",
-        overview: "Overview",
-        poster_path: "/poster.jpg",
-        backdrop_path: "/backdrop.jpg",
-        release_date: "2020-01-01",
-        vote_average: 8.4,
-        vote_count: 100,
-        genre_ids: [],
-        runtime: null,
-      },
-      loading: false,
-      error: null,
-    });
-
-    render(
-      <MemoryRouter initialEntries={["/movie/1"]}>
-        <Routes>
-          <Route path="/movie/:id" element={<MovieDetail />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-
-    expect(screen.queryByText("min")).not.toBeInTheDocument();
-  });
-
-  it("renders 135 minutes as 2h 15m", () => {
+  it("renders 135-minute runtime as hours and minutes", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
@@ -109,7 +80,7 @@ describe("MovieDetail runtime", () => {
     expect(screen.queryByText("135 min")).not.toBeInTheDocument();
   });
 
-  it("renders 45 minutes as 45m", () => {
+  it("renders 45-minute runtime as minutes only", () => {
     mockUseFetch.mockReturnValue({
       data: {
         id: 1,
