@@ -68,7 +68,7 @@ describe("MovieDetail page", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     expect(screen.getByText("Audience Snapshot")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "➕ Add to Watchlist" }));
 
@@ -105,7 +105,7 @@ describe("MovieDetail page", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     await userEvent.click(
       screen.getByRole("button", { name: "❌ Remove from Watchlist" }),
     );
