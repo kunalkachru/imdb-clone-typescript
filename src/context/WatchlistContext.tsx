@@ -13,6 +13,10 @@ function watchlistReducer(state: Movie[], action: WatchlistAction): Movie[] {
       return [...state, action.payload];
     case "REMOVE_MOVIE":
       return state.filter((movie) => movie.id !== action.payload);
+    case "TOGGLE_MOVIE":
+      return state.some((movie) => movie.id === action.payload.id)
+        ? state.filter((movie) => movie.id !== action.payload.id)
+        : [...state, action.payload];
     case "SET_MOVIES":
       return action.payload;
     case "CLEAR":
