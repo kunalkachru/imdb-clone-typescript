@@ -52,7 +52,7 @@ describe("Watchlist page", () => {
     localStorage.clear();
   });
 
-  it("renders empty state", () => {
+  it("AC-5: renders the empty state without movie cards or toggles", () => {
     renderWithContext({
       watchlist: [],
       dispatch: vi.fn(),
@@ -60,6 +60,7 @@ describe("Watchlist page", () => {
     });
 
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /watchlist/i })).not.toBeInTheDocument();
   });
 
   it("shows the headline and guidance paragraph in the empty state", () => {
@@ -140,7 +141,7 @@ describe("Watchlist page", () => {
     ).toHaveTextContent(/in Watchlist \(0\)$/);
   });
 
-  it("renders movies and supports clearing", async () => {
+  it("AC-4: renders saved movies with active remove toggles", async () => {
     const dispatch = vi.fn();
 
     renderWithContext({
@@ -150,6 +151,13 @@ describe("Watchlist page", () => {
     });
 
     expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
+    const removeToggle = screen.getByRole("button", {
+      name: "Remove Inception from watchlist",
+    });
+    expect(removeToggle).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(removeToggle);
+    expect(dispatch).toHaveBeenCalledWith({ type: "REMOVE_MOVIE", payload: movie.id });
+
     await userEvent.click(screen.getByRole("button", { name: "Clear All" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "CLEAR" });
   });

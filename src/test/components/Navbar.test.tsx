@@ -29,7 +29,7 @@ describe("Navbar", () => {
     expect(screen.getByRole("link", { name: "Login" })).toBeInTheDocument();
   });
 
-  it("shows the Actors link alongside Home and Watchlist for guests", () => {
+  it("AC-3: exposes the Watchlist link for guest navigation", () => {
     render(
       <AuthContext.Provider value={baseAuthValue}>
         <MemoryRouter>
@@ -42,9 +42,13 @@ describe("Navbar", () => {
     expect(actors.getAttribute("href")).toMatch(/\/actors$/);
     expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Watchlist" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute(
+      "href",
+      "/watchlist",
+    );
   });
 
-  it("shows the Actors link for authenticated users", () => {
+  it("AC-3: exposes the Watchlist link for authenticated navigation", () => {
     render(
       <AuthContext.Provider
         value={{
@@ -64,6 +68,10 @@ describe("Navbar", () => {
     expect(actors.getAttribute("href")).toMatch(/\/actors$/);
     expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Watchlist" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute(
+      "href",
+      "/watchlist",
+    );
   });
 
   it("shows user and logout for authenticated users", async () => {

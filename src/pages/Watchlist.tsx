@@ -154,7 +154,7 @@ const Watchlist = () => {
           {filteredMovies.map((movie: Movie) => (
             <div
               key={movie.id}
-              className="bg-gray-800 rounded-lg overflow-hidden group relative"
+              className="movie-card bg-gray-800 rounded-lg overflow-hidden group relative"
             >
               <div
                 onClick={() => navigate(`/movie/${movie.id}`)}
@@ -177,6 +177,9 @@ const Watchlist = () => {
 
               {/* Remove button on hover */}
               <button
+                type="button"
+                aria-label={`Remove ${movie.title} from watchlist`}
+                aria-pressed="true"
                 onClick={() =>
                   dispatch({ type: "REMOVE_MOVIE", payload: movie.id })
                 }
