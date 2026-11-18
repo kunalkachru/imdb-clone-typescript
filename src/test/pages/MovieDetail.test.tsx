@@ -41,7 +41,7 @@ describe("MovieDetail page", () => {
     expect(screen.getByText("Invalid movie id")).toBeInTheDocument();
   });
 
-  it("renders movie detail and dispatches add to watchlist", async () => {
+  it("AC-2: renders Add to Watchlist and dispatches add for an unsaved movie", async () => {
     mockIsInWatchlist.mockReturnValue(false);
     mockUseFetch.mockReturnValue({
       data: {
@@ -70,7 +70,7 @@ describe("MovieDetail page", () => {
 
     expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     expect(screen.getByText("Audience Snapshot")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "➕ Add to Watchlist" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add to Watchlist" }));
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: "ADD_MOVIE",
@@ -139,7 +139,7 @@ describe("MovieDetail page", () => {
     expect(heading).not.toHaveTextContent(/[()]/);
   });
 
-  it("renders movie detail and dispatches remove from watchlist", async () => {
+  it("AC-2: renders Remove from Watchlist and dispatches remove for a saved movie", async () => {
     mockIsInWatchlist.mockReturnValue(true);
     mockUseFetch.mockReturnValue({
       data: {
@@ -168,7 +168,7 @@ describe("MovieDetail page", () => {
 
     expect(screen.getByText("Inception (2010)")).toBeInTheDocument();
     await userEvent.click(
-      screen.getByRole("button", { name: "❌ Remove from Watchlist" }),
+      screen.getByRole("button", { name: "Remove from Watchlist" }),
     );
 
     expect(mockDispatch).toHaveBeenCalledWith({
