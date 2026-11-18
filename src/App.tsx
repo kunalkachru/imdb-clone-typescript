@@ -6,7 +6,6 @@ import Watchlist from "./pages/Watchlist";
 import Actors from "./pages/Actors";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 
 function App() {
@@ -20,16 +19,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/actors" element={<Actors />} />
 
-          {/* <Route path="/watchlist" element={<Watchlist />} /> */}
-          {/* Protected — only logged in users can access */}
-          <Route
-            path="/watchlist"
-            element={
-              <ProtectedRoute>
-                <Watchlist />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/watchlist" element={<Watchlist />} />
         </Routes>
       </main>
       <Footer />

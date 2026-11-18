@@ -71,9 +71,51 @@ describe("Watchlist page", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist (0)" })).toBeInTheDocument();
     expect(screen.getByTestId("watchlist-empty-guidance")).toHaveTextContent(
-      "Signed-in users can save films to their watchlist from any movie page.",
+      "Save films to your watchlist from any movie page.",
     );
+    expect(screen.getByTestId("watchlist-empty-guidance")).not.toHaveTextContent(/sign-in/i);
     expect(screen.getByTestId("watchlist-empty-guidance")).not.toHaveAttribute("role");
+  });
+
+  it("AC-4: renders every saved movie as a navigable card and removes only the selected movie", async () => {
+    const dispatch = vi.fn();
+
+    renderWithContext({
+      watchlist: movies,
+      dispatch,
+      isInWatchlist: () => true,
+    });
+
+    expect(screen.getByRole("heading", { name: "Charlie (2010)" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Alpha (2010)" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Bravo (2010)" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Charlie" }).closest("div[role]")).toBeNull();
+
+    const movieLinks = screen.getAllByRole("link").filter((link) =>
+      link.getAttribute("href")?.includes("/movie/"),
+    );
+    expect(movieLinks.map((link) => link.getAttribute("href"))).toEqual([
+      "/movie/3",
+      "/movie/2",
+      "/movie/1",
+    ]);
+
+    await userEvent.click(screen.getByRole("button", { name: /remove Charlie from watchlist/i }));
+    expect(dispatch).toHaveBeenCalledWith({ type: "REMOVE_MOVIE", payload: 3 });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("AC-5: renders the empty state with Browse Movies and no movie cards or sign-in message", () => {
+    renderWithContext({
+      watchlist: [],
+      dispatch: vi.fn(),
+      isInWatchlist: () => false,
+    });
+
+    expect(screen.getByRole("button", { name: "Browse Movies" })).toBeInTheDocument();
+    expect(screen.queryAllByRole("heading", { level: 2 })).toHaveLength(0);
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.queryByText(/sign[- ]?in/i)).not.toBeInTheDocument();
   });
 
   it("renders no movie cards, images or search-result messages in the empty state", () => {

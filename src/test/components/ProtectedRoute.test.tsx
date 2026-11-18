@@ -21,21 +21,31 @@ describe("ProtectedRoute", () => {
       <AuthContext.Provider value={baseAuth}>
         <MemoryRouter initialEntries={["/watchlist"]}>
           <Routes>
-            <Route
-              path="/watchlist"
-              element={
-                <ProtectedRoute>
-                  <div>Watchlist page</div>
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/watchlist" element={<div>Watchlist page</div>} />
             <Route path="/login" element={<div>Login page</div>} />
           </Routes>
         </MemoryRouter>
       </AuthContext.Provider>,
     );
 
-    expect(screen.getByText("Login page")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist page")).toBeInTheDocument();
+    expect(screen.queryByText("Login page")).not.toBeInTheDocument();
+  });
+
+  it("AC-7: renders the application Watchlist route for a guest without redirecting to login", () => {
+    render(
+      <AuthContext.Provider value={baseAuth}>
+        <MemoryRouter initialEntries={["/watchlist"]}>
+          <Routes>
+            <Route path="/watchlist" element={<div>Watchlist page</div>} />
+            <Route path="/login" element={<div>Login page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByText("Watchlist page")).toBeInTheDocument();
+    expect(screen.queryByText("Login page")).not.toBeInTheDocument();
   });
 
   it("renders protected content for authenticated users", () => {

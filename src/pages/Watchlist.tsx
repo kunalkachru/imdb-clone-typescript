@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useWatchlist } from "../hooks/useWatchlist";
 import type { Movie } from "../types/movie";
 import Navbar from "../components/Navbar";
@@ -120,7 +120,7 @@ const Watchlist = () => {
               data-testid="watchlist-empty-guidance"
               className="text-gray-400 text-base max-w-md text-center"
             >
-              Signed-in users can save films to their watchlist from any movie page.
+              Save films to your watchlist from any movie page.
             </p>
             <button
               onClick={() => navigate("/")}
@@ -156,9 +156,9 @@ const Watchlist = () => {
               key={movie.id}
               className="bg-gray-800 rounded-lg overflow-hidden group relative"
             >
-              <div
-                onClick={() => navigate(`/movie/${movie.id}`)}
-                className="cursor-pointer hover:scale-105 transition-transform"
+              <Link
+                to={`/movie/${movie.id}`}
+                className="block cursor-pointer hover:scale-105 transition-transform"
               >
                 <img
                   src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
@@ -173,10 +173,12 @@ const Watchlist = () => {
                     ⭐ {movie.vote_average.toFixed(1)}
                   </p>
                 </div>
-              </div>
+              </Link>
 
               {/* Remove button on hover */}
               <button
+                type="button"
+                aria-label={`Remove ${movie.title} from watchlist`}
                 onClick={() =>
                   dispatch({ type: "REMOVE_MOVIE", payload: movie.id })
                 }

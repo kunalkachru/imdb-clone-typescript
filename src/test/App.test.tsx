@@ -120,7 +120,7 @@ const expectSingleVisibleAttribution = () => {
 };
 
 describe("application route shell", () => {
-  it("renders exactly one TMDB attribution footer on each configured route", () => {
+  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
@@ -150,5 +150,18 @@ describe("application route shell", () => {
     await user.click(screen.getByRole("link", { name: "Home" }));
     expect(screen.getByRole("heading", { name: "🎬 Trending Movies" })).toBeVisible();
     expectSingleVisibleAttribution();
+  });
+
+  it("AC-8: resolves watchlist and movie links with HashRouter-compatible paths", async () => {
+    localStorage.setItem("user", JSON.stringify(testUser));
+    localStorage.setItem("token", "test-token");
+    localStorage.setItem("watchlist:1", JSON.stringify([testMovie]));
+    const user = userEvent.setup();
+    renderApp();
+
+    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute("href", "/watchlist");
+    await user.click(screen.getByRole("link", { name: "Watchlist" }));
+    expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
+    expect(screen.getByRole("link", { name: /Test Movie/ })).toHaveAttribute("href", "/movie/1");
   });
 });
