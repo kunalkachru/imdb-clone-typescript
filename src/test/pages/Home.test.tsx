@@ -1,15 +1,24 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import Home from "../../pages/Home";
 import { AuthContext } from "../../context/AuthContextDef";
 import type { AuthContextType } from "../../types/auth";
 
 const mockUseFetch = vi.fn();
+const mockDispatch = vi.fn();
+const mockIsInWatchlist = vi.fn();
 
 vi.mock("../../hooks/useFetch", () => ({
   default: (...args: unknown[]) => mockUseFetch(...args),
+}));
+
+vi.mock("../../hooks/useWatchlist", () => ({
+  useWatchlist: () => ({
+    dispatch: mockDispatch,
+    isInWatchlist: mockIsInWatchlist,
+  }),
 }));
 
 const authValue: AuthContextType = {
@@ -22,9 +31,70 @@ const authValue: AuthContextType = {
   logout: vi.fn(),
 };
 
+const LocationProbe = () => (
+  <output data-testid="location">{useLocation().pathname}</output>
+);
+
 describe("Home page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsInWatchlist.mockReturnValue(false);
+  });
+
+  it("AC-1: toggles a movie card watchlist state without navigating", async () => {
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [
+            {
+              id: 1,
+              title: "Inception",
+              overview: "Overview",
+              poster_path: "/p.jpg",
+              backdrop_path: "/b.jpg",
+              release_date: "2010-07-16",
+              vote_average: 8.4,
+              vote_count: 100,
+              genre_ids: [],
+            },
+          ],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <LocationProbe />
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const toggle = screen.getByRole("button", {
+      name: "Add Inception to watchlist",
+    });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    await userEvent.click(toggle);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "ADD_MOVIE",
+      payload: expect.objectContaining({ id: 1, title: "Inception" }),
+    });
+    expect(screen.getByTestId("location")).toHaveTextContent("/");
+    expect(
+      screen.getByRole("heading", { name: "🎬 Trending Movies" }),
+    ).toBeInTheDocument();
   });
 
   it("renders trending movies", () => {
