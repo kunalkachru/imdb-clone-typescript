@@ -187,7 +187,10 @@ const MovieDetail = () => {
             </p>
             {/* Watchlist Button — changes based on alreadyAdded */}
             <button
+              type="button"
               onClick={handleWatchlist}
+              aria-label={`${alreadyAdded ? "Remove" : "Add"} ${movie.title} to watchlist`}
+              aria-pressed={alreadyAdded}
               className={`w-fit px-6 py-3 rounded-lg font-bold transition-colors ${
                 alreadyAdded
                   ? "bg-red-500 hover:bg-red-600 text-white"
