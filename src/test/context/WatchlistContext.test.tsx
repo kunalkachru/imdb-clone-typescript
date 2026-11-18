@@ -73,7 +73,7 @@ describe("WatchlistContext", () => {
   });
 
   it("AC-6: persists added movies under the active user's watchlist key", async () => {
-    const remountedView = render(
+    render(
       <AuthContext.Provider value={defaultAuthValue}>
         <WatchlistProvider>
           <Harness />
