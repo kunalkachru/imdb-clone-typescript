@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { HashRouter, MemoryRouter } from "react-router-dom";
 import App from "../App";
 import { AuthProvider } from "../context/AuthContext";
 import { WatchlistProvider } from "../context/WatchlistContext";
@@ -156,12 +156,23 @@ describe("application route shell", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
     localStorage.setItem("watchlist:1", JSON.stringify([testMovie]));
+    window.location.hash = "/";
     const user = userEvent.setup();
-    renderApp();
+    const { unmount } = render(
+      <HashRouter>
+        <AuthProvider>
+          <WatchlistProvider>
+            <App />
+          </WatchlistProvider>
+        </AuthProvider>
+      </HashRouter>,
+    );
 
-    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute("href", "/watchlist");
+    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute("href", "#/watchlist");
     await user.click(screen.getByRole("link", { name: "Watchlist" }));
     expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
-    expect(screen.getByRole("link", { name: /Test Movie/ })).toHaveAttribute("href", "/movie/1");
+    expect(window.location.hash).toBe("#/watchlist");
+    expect(screen.getByRole("link", { name: /Test Movie/ })).toHaveAttribute("href", "#/movie/1");
+    unmount();
   });
 });
