@@ -120,7 +120,7 @@ const expectSingleVisibleAttribution = () => {
 };
 
 describe("application route shell", () => {
-  it("renders exactly one TMDB attribution footer on each configured route", () => {
+  it("AC-7: preserves existing route-shell footer behavior on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
