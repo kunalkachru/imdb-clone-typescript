@@ -29,7 +29,7 @@ describe("Navbar", () => {
     expect(screen.getByRole("link", { name: "Login" })).toBeInTheDocument();
   });
 
-  it("shows the Actors link alongside Home and Watchlist for guests", () => {
+  it("AC-3: renders the Watchlist link for guests and authenticated users", () => {
     render(
       <AuthContext.Provider value={baseAuthValue}>
         <MemoryRouter>
@@ -44,7 +44,7 @@ describe("Navbar", () => {
     expect(screen.getByRole("link", { name: "Watchlist" })).toBeInTheDocument();
   });
 
-  it("shows the Actors link for authenticated users", () => {
+  it("AC-3: renders the Watchlist link for authenticated users", () => {
     render(
       <AuthContext.Provider
         value={{

@@ -18,6 +18,8 @@ const movie = {
   genre_ids: [1],
 };
 
+const otherMovie = { ...movie, id: 2, title: "Other movie" };
+
 const defaultAuthValue: AuthContextType = {
   user: { id: 1, name: "John", email: "john@example.com", createdAt: "now" },
   token: "token",
@@ -33,40 +35,64 @@ const Harness = () => {
 
   return (
     <div>
-      <div data-testid="count">{watchlist.length}</div>
+      <div data-testid="watchlist">{JSON.stringify(watchlist)}</div>
       <button onClick={() => dispatch({ type: "ADD_MOVIE", payload: movie })}>
-        add
+        add movie
       </button>
+      <button
+        onClick={() => dispatch({ type: "ADD_MOVIE", payload: otherMovie })}
+      >
+        add other movie
+      </button>
+      <button onClick={() => dispatch({ type: "REMOVE_MOVIE", payload: movie.id })}>
+        remove movie
+      </button>
+      <button onClick={() => dispatch({ type: "CLEAR" })}>clear watchlist</button>
     </div>
   );
 };
+
+const renderWatchlist = (authValue: AuthContextType | null = null) =>
+  render(
+    <AuthContext.Provider value={authValue}>
+      <WatchlistProvider>
+        <Harness />
+      </WatchlistProvider>
+    </AuthContext.Provider>,
+  );
 
 describe("WatchlistContext", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it("persists watchlist per user key", async () => {
-    render(
-      <AuthContext.Provider value={defaultAuthValue}>
-        <WatchlistProvider>
-          <Harness />
-        </WatchlistProvider>
-      </AuthContext.Provider>,
+  it("AC-6: persists adding, removing, and clearing the complete active watchlist", async () => {
+    renderWatchlist();
+
+    await userEvent.click(screen.getByText("add movie"));
+    await userEvent.click(screen.getByText("add other movie"));
+    await waitFor(() =>
+      expect(localStorage.getItem("watchlist:guest")).toBe(
+        JSON.stringify([movie, otherMovie]),
+      ),
     );
 
-    await userEvent.click(screen.getByText("add"));
+    await userEvent.click(screen.getByText("remove movie"));
+    await waitFor(() =>
+      expect(localStorage.getItem("watchlist:guest")).toBe(
+        JSON.stringify([otherMovie]),
+      ),
+    );
 
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
-    expect(localStorage.getItem("watchlist:1")).toContain('"id":1');
+    await userEvent.click(screen.getByText("clear watchlist"));
+    await waitFor(() =>
+      expect(localStorage.getItem("watchlist:guest")).toBe("[]"),
+    );
   });
 
   it("loads the correct watchlist when user changes", async () => {
     localStorage.setItem("watchlist:1", JSON.stringify([movie]));
-    localStorage.setItem(
-      "watchlist:2",
-      JSON.stringify([{ ...movie, id: 2, title: "Other movie" }]),
-    );
+    localStorage.setItem("watchlist:2", JSON.stringify([otherMovie]));
 
     const { rerender } = render(
       <AuthContext.Provider value={defaultAuthValue}>
@@ -76,7 +102,11 @@ describe("WatchlistContext", () => {
       </AuthContext.Provider>,
     );
 
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("watchlist")).toHaveTextContent(
+        JSON.stringify([movie]),
+      ),
+    );
 
     rerender(
       <AuthContext.Provider
@@ -91,8 +121,11 @@ describe("WatchlistContext", () => {
       </AuthContext.Provider>,
     );
 
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
-    expect(localStorage.getItem("watchlist:2")).toContain('"id":2');
+    await waitFor(() =>
+      expect(screen.getByTestId("watchlist")).toHaveTextContent(
+        JSON.stringify([otherMovie]),
+      ),
+    );
   });
 
   it("does not leak previous user's movies into a new user's empty watchlist", async () => {
@@ -107,7 +140,11 @@ describe("WatchlistContext", () => {
       </AuthContext.Provider>,
     );
 
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("watchlist")).toHaveTextContent(
+        JSON.stringify([movie]),
+      ),
+    );
 
     rerender(
       <AuthContext.Provider
@@ -122,7 +159,34 @@ describe("WatchlistContext", () => {
       </AuthContext.Provider>,
     );
 
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("0"));
+    await waitFor(() =>
+      expect(screen.getByTestId("watchlist")).toHaveTextContent("[]"),
+    );
     expect(localStorage.getItem("watchlist:2")).toBe("[]");
+  });
+
+  it("AC-6: restores the guest watchlist in a new provider instance", async () => {
+    const firstRender = renderWatchlist();
+
+    await userEvent.click(screen.getByText("add movie"));
+    await waitFor(() =>
+      expect(localStorage.getItem("watchlist:guest")).toBe(JSON.stringify([movie])),
+    );
+
+    firstRender.unmount();
+    renderWatchlist();
+
+    expect(screen.getByTestId("watchlist")).toHaveTextContent(JSON.stringify([movie]));
+  });
+
+  it("AC-6: persists authenticated watchlists under the user-scoped key", async () => {
+    renderWatchlist(defaultAuthValue);
+
+    await userEvent.click(screen.getByText("add movie"));
+
+    await waitFor(() =>
+      expect(localStorage.getItem("watchlist:1")).toBe(JSON.stringify([movie])),
+    );
+    expect(localStorage.getItem("watchlist:guest")).toBeNull();
   });
 });

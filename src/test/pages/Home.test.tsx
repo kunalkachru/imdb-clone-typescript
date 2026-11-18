@@ -7,9 +7,18 @@ import { AuthContext } from "../../context/AuthContextDef";
 import type { AuthContextType } from "../../types/auth";
 
 const mockUseFetch = vi.fn();
+const mockDispatch = vi.fn();
+const mockIsInWatchlist = vi.fn();
 
 vi.mock("../../hooks/useFetch", () => ({
   default: (...args: unknown[]) => mockUseFetch(...args),
+}));
+
+vi.mock("../../hooks/useWatchlist", () => ({
+  useWatchlist: () => ({
+    dispatch: mockDispatch,
+    isInWatchlist: mockIsInWatchlist,
+  }),
 }));
 
 const authValue: AuthContextType = {
@@ -25,6 +34,7 @@ const authValue: AuthContextType = {
 describe("Home page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsInWatchlist.mockReturnValue(false);
   });
 
   it("renders trending movies", () => {
@@ -60,6 +70,85 @@ describe("Home page", () => {
     expect(screen.getByText("🎬 Trending Movies")).toBeInTheDocument();
     expect(screen.getByText("Inception")).toBeInTheDocument();
     expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
+  });
+
+  it("AC-1: adds and removes a movie from the card watchlist toggle without navigating", async () => {
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 1, title: "Inception", vote_average: 8.4, poster_path: "/p.jpg" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    const view = render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const toggle = screen.getByRole("button", { name: /Add Inception to watchlist/i });
+    await userEvent.click(toggle);
+    expect(mockDispatch).toHaveBeenLastCalledWith({
+      type: "ADD_MOVIE",
+      payload: expect.objectContaining({ id: 1 }),
+    });
+    expect(screen.getByText("Inception")).toBeInTheDocument();
+
+    mockIsInWatchlist.mockReturnValue(true);
+    view.rerender(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: /Remove Inception from watchlist/i }));
+    expect(mockDispatch).toHaveBeenLastCalledWith({ type: "REMOVE_MOVIE", payload: 1 });
+    expect(screen.getByText("Inception")).toBeInTheDocument();
+  });
+
+  it("AC-1: renders an accessible watchlist toggle state for a saved movie", () => {
+    mockIsInWatchlist.mockReturnValue(true);
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 1, title: "Inception", vote_average: 8.4, poster_path: "/p.jpg" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Remove Inception from watchlist" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("shows the release year on cards and keeps the bare title for alt text", () => {

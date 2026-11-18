@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import {
   discoverMoviesByGenre,
@@ -10,7 +10,7 @@ import {
 } from "../services/tmdb";
 import type { Genre, Movie } from "../types/movie";
 import Navbar from "../components/Navbar";
-import { formatMovieTitle } from "../utils/formatMovieTitle";
+import MovieCard from "../components/MovieCard";
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,7 +24,6 @@ const Home = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>(urlGenre);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
 
-  const navigate = useNavigate();
   const hasSearched = activeSearch.trim().length > 0;
   const selectedGenreId = Number(selectedGenre);
   const hasGenreFilter = Number.isFinite(selectedGenreId) && selectedGenreId > 0;
@@ -194,25 +193,7 @@ const Home = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {movies.map((movie: Movie) => (
-            <div
-              key={movie.id}
-              onClick={() => navigate(`/movie/${movie.id}`)}
-              className="bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer"
-            >
-              <img
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                alt={movie.title}
-                className="w-full object-cover"
-              />
-              <div className="p-3">
-                <h2 className="text-white font-semibold text-sm truncate">
-                  {formatMovieTitle(movie.title, movie.release_date)}
-                </h2>
-                <p className="text-yellow-400 text-sm mt-1">
-                  ⭐ {movie.vote_average.toFixed(1)}
-                </p>
-              </div>
-            </div>
+            <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
 

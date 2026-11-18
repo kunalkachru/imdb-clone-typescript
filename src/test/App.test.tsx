@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { HashRouter, MemoryRouter } from "react-router-dom";
 import App from "../App";
 import { AuthProvider } from "../context/AuthContext";
 import { WatchlistProvider } from "../context/WatchlistContext";
@@ -120,7 +120,7 @@ const expectSingleVisibleAttribution = () => {
 };
 
 describe("application route shell", () => {
-  it("renders exactly one TMDB attribution footer on each configured route", () => {
+  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
@@ -150,5 +150,29 @@ describe("application route shell", () => {
     await user.click(screen.getByRole("link", { name: "Home" }));
     expect(screen.getByRole("heading", { name: "🎬 Trending Movies" })).toBeVisible();
     expectSingleVisibleAttribution();
+  });
+
+  it("AC-8: resolves watchlist and movie links with HashRouter-compatible paths", async () => {
+    localStorage.setItem("user", JSON.stringify(testUser));
+    localStorage.setItem("token", "test-token");
+    localStorage.setItem("watchlist:1", JSON.stringify([testMovie]));
+    window.location.hash = "/";
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <HashRouter>
+        <AuthProvider>
+          <WatchlistProvider>
+            <App />
+          </WatchlistProvider>
+        </AuthProvider>
+      </HashRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Watchlist" })).toHaveAttribute("href", "#/watchlist");
+    await user.click(screen.getByRole("link", { name: "Watchlist" }));
+    expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
+    expect(window.location.hash).toBe("#/watchlist");
+    expect(screen.getByRole("link", { name: /Test Movie/ })).toHaveAttribute("href", "#/movie/1");
+    unmount();
   });
 });
