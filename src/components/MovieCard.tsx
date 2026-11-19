@@ -26,11 +26,17 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       onClick={() => navigate(`/movie/${movie.id}`)}
       className="relative bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer"
     >
-      <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={movie.title}
-        className="w-full object-cover"
-      />
+      {movie.poster_path ? (
+        <img
+          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+          alt={movie.title}
+          className="w-full object-cover"
+        />
+      ) : (
+        <div className="w-full aspect-[2/3] bg-gray-400 flex items-center justify-center text-gray-800 font-semibold">
+          No poster
+        </div>
+      )}
       <div className="p-3">
         <h2 className="text-white font-semibold text-sm truncate">
           {formatMovieTitle(movie.title, movie.release_date)}

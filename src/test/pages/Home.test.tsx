@@ -72,6 +72,68 @@ describe("Home page", () => {
     expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
   });
 
+  it("renders a grey No poster placeholder for a movie without a poster", () => {
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 1, title: "Inception", vote_average: 8.4, poster_path: "" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByText("No poster")).toHaveClass("bg-gray-400");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
+
+  it("renders the existing poster and title alt text for a movie with a poster", () => {
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return { data: { genres: [] }, loading: false, error: null };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 1, title: "Inception", vote_average: 8.4, poster_path: "/p.jpg" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByRole("img", { name: "Inception" })).toHaveAttribute(
+      "src",
+      "https://image.tmdb.org/t/p/w500/p.jpg",
+    );
+  });
+
   it("AC-1: adds and removes a movie from the card watchlist toggle without navigating", async () => {
     mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
       void fetchFn;
