@@ -23,6 +23,28 @@ const formatRuntime = (runtime: number) => {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 };
 
+const formatMoney = (amount: number) => {
+  const units = [
+    { value: 1_000_000_000, suffix: "B" },
+    { value: 1_000_000, suffix: "M" },
+    { value: 1_000, suffix: "K" },
+  ];
+  const unit = units.find(({ value }) => amount >= value);
+
+  if (!unit) return `$${amount}`;
+
+  const value = amount / unit.value;
+  return `$${value.toFixed(value >= 10 ? 0 : 1).replace(/\.0$/, "")}${unit.suffix}`;
+};
+
+const getLanguageName = (code: string) => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+};
+
 const MovieDetail = () => {
   // TS LESSON: useParams returns Record<string, string | undefined>
   // we destructure and type the id explicitly
@@ -165,6 +187,18 @@ const MovieDetail = () => {
               {/* TS LESSON: optional field — runtime might not exist */}
               {movie.runtime != null && movie.runtime > 0 && (
                 <span className="text-gray-300">{formatRuntime(movie.runtime)}</span>
+              )}
+            </div>
+
+            <div className="flex gap-4 mb-4 flex-wrap text-gray-300">
+              {movie.budget != null && movie.budget > 0 && (
+                <span>Budget {formatMoney(movie.budget)}</span>
+              )}
+              {movie.revenue != null && movie.revenue > 0 && (
+                <span>Box office {formatMoney(movie.revenue)}</span>
+              )}
+              {movie.original_language && (
+                <span>Original language {getLanguageName(movie.original_language)}</span>
               )}
             </div>
 
