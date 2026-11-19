@@ -278,4 +278,88 @@ describe("MovieDetail page", () => {
     expect(screen.getAllByText("Would recommend").length).toBeGreaterThan(0);
     expect(screen.getByText("Community feedback highlights")).toBeInTheDocument();
   });
+
+  it("renders an official website link in a new tab when homepage is available", () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [28],
+        genres: [{ id: 28, name: "Action" }],
+        homepage: "https://example.com/inception",
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Official website" })).toHaveAttribute(
+      "href",
+      "https://example.com/inception",
+    );
+    expect(screen.getByRole("link", { name: "Official website" })).toHaveAttribute(
+      "target",
+      "_blank",
+    );
+  });
+
+  it("omits the official website link when homepage is unavailable", () => {
+    renderMovieWithRating();
+
+    expect(screen.queryByRole("link", { name: "Official website" })).not.toBeInTheDocument();
+  });
+
+  it("renders each genre as a link to the Home genre filter", () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [28, 878],
+        genres: [
+          { id: 28, name: "Action" },
+          { id: 878, name: "Science Fiction" },
+        ],
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Action" })).toHaveAttribute(
+      "href",
+      "/?genre=28",
+    );
+    expect(screen.getByRole("link", { name: "Science Fiction" })).toHaveAttribute(
+      "href",
+      "/?genre=878",
+    );
+  });
 });
