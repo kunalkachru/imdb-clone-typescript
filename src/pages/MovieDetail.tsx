@@ -157,7 +157,7 @@ const MovieDetail = () => {
 
             <div className="flex gap-4 mb-4">
               <span className="text-yellow-400 font-bold text-xl">
-                ⭐ {movie.vote_average.toFixed(1)}
+                ⭐ {movie.vote_average.toFixed(1)} ({movie.vote_count.toLocaleString("en-US")} votes)
               </span>
               <span className="text-gray-300">
                 {movie.release_date?.split("-")[0]}
