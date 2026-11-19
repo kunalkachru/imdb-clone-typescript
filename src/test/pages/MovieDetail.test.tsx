@@ -27,35 +27,38 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail page", () => {
-  it("AC-1: renders the rating with a thousands-separated vote count", () => {
-    mockIsInWatchlist.mockReturnValue(false);
-    mockUseFetch.mockReturnValue({
-      data: {
-        id: 1,
-        title: "Inception",
-        overview: "Overview",
-        poster_path: "/poster.jpg",
-        backdrop_path: "/backdrop.jpg",
-        release_date: "2010-01-01",
-        vote_average: 8.4,
-        vote_count: 12345,
-        genre_ids: [1],
-        genres: [{ id: 1, name: "Action" }],
-      },
-      loading: false,
-      error: null,
-    });
+  it(
+    "MovieDetail page > renders the rating with a thousands-separated vote count (AC-1)",
+    () => {
+      mockIsInWatchlist.mockReturnValue(false);
+      mockUseFetch.mockReturnValue({
+        data: {
+          id: 1,
+          title: "Inception",
+          overview: "Overview",
+          poster_path: "/poster.jpg",
+          backdrop_path: "/backdrop.jpg",
+          release_date: "2010-01-01",
+          vote_average: 8.4,
+          vote_count: 12345,
+          genre_ids: [1],
+          genres: [{ id: 1, name: "Action" }],
+        },
+        loading: false,
+        error: null,
+      });
 
-    render(
-      <MemoryRouter initialEntries={["/movie/1"]}>
-        <Routes>
-          <Route path="/movie/:id" element={<MovieDetail />} />
-        </Routes>
-      </MemoryRouter>,
-    );
+      render(
+        <MemoryRouter initialEntries={["/movie/1"]}>
+          <Routes>
+            <Route path="/movie/:id" element={<MovieDetail />} />
+          </Routes>
+        </MemoryRouter>,
+      );
 
-    expect(screen.getByText("⭐ 8.4 (12,345 votes)")).toBeInTheDocument();
-  });
+      expect(screen.getByText("⭐ 8.4 (12,345 votes)")).toBeInTheDocument();
+    },
+  );
 
   it("shows invalid id message for malformed route params", () => {
     mockUseFetch.mockReturnValue({ data: null, loading: false, error: null });
