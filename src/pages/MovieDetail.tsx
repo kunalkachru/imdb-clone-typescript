@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { getMovieDetail } from "../services/tmdb";
 import type { Movie, MovieDetail as MovieDetailType } from "../types/movie";
@@ -172,12 +172,13 @@ const MovieDetail = () => {
             {movie.genres && movie.genres.length > 0 && (
               <div className="flex gap-2 mb-4 flex-wrap">
                 {movie.genres.map((genre_item) => (
-                  <span
+                  <Link
                     key={genre_item.id}
+                    to={`/?genre=${genre_item.id}`}
                     className="px-3 py-1 bg-yellow-400/20 text-yellow-400 rounded-full text-sm font-medium"
                   >
                     {genre_item.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
@@ -185,6 +186,16 @@ const MovieDetail = () => {
             <p className="text-gray-300 text-base leading-relaxed max-w-2xl">
               {movie.overview}
             </p>
+            {movie.homepage && (
+              <a
+                href={movie.homepage}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 w-fit text-yellow-400 underline hover:text-yellow-300"
+              >
+                Official website
+              </a>
+            )}
             {/* Watchlist Button — changes based on alreadyAdded */}
             <button
               type="button"

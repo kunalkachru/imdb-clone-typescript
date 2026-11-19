@@ -1,13 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import MovieDetail from "../../pages/MovieDetail";
+import Home from "../../pages/Home";
+import { AuthContext } from "../../context/AuthContextDef";
+import type { AuthContextType } from "../../types/auth";
 
 const mockUseFetch = vi.fn();
 const mockDispatch = vi.fn();
 const mockIsInWatchlist = vi.fn();
 const mockAuthUser = { id: 1, name: "John", email: "john@example.com", createdAt: "now" };
+const authValue: AuthContextType = {
+  user: null,
+  token: null,
+  status: "idle",
+  error: null,
+  login: async () => false,
+  register: async () => false,
+  logout: vi.fn(),
+};
 
 vi.mock("../../hooks/useFetch", () => ({
   default: (...args: unknown[]) => mockUseFetch(...args),
@@ -27,6 +39,11 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail page", () => {
+  const LocationProbe = () => {
+    const location = useLocation();
+    return <output data-testid="location">{location.pathname}{location.search}</output>;
+  };
+
   const renderMovieWithRating = () => {
     mockIsInWatchlist.mockReturnValue(false);
     mockUseFetch.mockReturnValue({
@@ -277,5 +294,155 @@ describe("MovieDetail page", () => {
     expect(screen.getByText("Overall 8/10")).toBeInTheDocument();
     expect(screen.getAllByText("Would recommend").length).toBeGreaterThan(0);
     expect(screen.getByText("Community feedback highlights")).toBeInTheDocument();
+  });
+
+  it("renders an official website link in a new tab when homepage is available", () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [28],
+        genres: [{ id: 28, name: "Action" }],
+        homepage: "https://example.com/inception",
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Official website" })).toHaveAttribute(
+      "href",
+      "https://example.com/inception",
+    );
+    expect(screen.getByRole("link", { name: "Official website" })).toHaveAttribute(
+      "target",
+      "_blank",
+    );
+  });
+
+  it("omits the official website link when homepage is unavailable", () => {
+    renderMovieWithRating();
+
+    expect(screen.queryByRole("link", { name: "Official website" })).not.toBeInTheDocument();
+  });
+
+  it("renders each genre as a link to the Home genre filter", () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    mockUseFetch.mockReturnValue({
+      data: {
+        id: 1,
+        title: "Inception",
+        overview: "Overview",
+        poster_path: "/poster.jpg",
+        backdrop_path: "/backdrop.jpg",
+        release_date: "2010-01-01",
+        vote_average: 8.4,
+        vote_count: 100,
+        genre_ids: [28, 878],
+        genres: [
+          { id: 28, name: "Action" },
+          { id: 878, name: "Science Fiction" },
+        ],
+      },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/movie/1"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Action" })).toHaveAttribute(
+      "href",
+      "/?genre=28",
+    );
+    expect(screen.getByRole("link", { name: "Science Fiction" })).toHaveAttribute(
+      "href",
+      "/?genre=878",
+    );
+  });
+
+  it("navigates to Home with the selected genre when a genre link is clicked", async () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === 1) {
+        return {
+          data: {
+            id: 1,
+            title: "Inception",
+            overview: "Overview",
+            poster_path: "/poster.jpg",
+            backdrop_path: "/backdrop.jpg",
+            release_date: "2010-01-01",
+            vote_average: 8.4,
+            vote_count: 100,
+            genre_ids: [28],
+            genres: [{ id: 28, name: "Action" }],
+          },
+          loading: false,
+          error: null,
+        };
+      }
+      if (dependency === "movie-genres") {
+        return {
+          data: { genres: [{ id: 28, name: "Action" }] },
+          loading: false,
+          error: null,
+        };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 2, title: "Action Movie", vote_average: 7, poster_path: "/p.jpg" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter initialEntries={["/movie/1"]}>
+          <Routes>
+            <Route path="/movie/:id" element={<MovieDetail />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Home />
+                  <LocationProbe />
+                </>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    await userEvent.click(screen.getByRole("link", { name: "Action" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent("/?genre=28");
+    expect(screen.getByRole("heading", { name: "🎭 Action Movies" })).toBeInTheDocument();
   });
 });
