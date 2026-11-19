@@ -344,6 +344,40 @@ describe("Home page", () => {
     ).toBeInTheDocument();
   });
 
+  it("applies the genre query parameter and renders the genre results heading", () => {
+    mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
+      void fetchFn;
+      if (dependency === "movie-genres") {
+        return {
+          data: { genres: [{ id: 28, name: "Action" }] },
+          loading: false,
+          error: null,
+        };
+      }
+      return {
+        data: {
+          page: 1,
+          total_pages: 1,
+          total_results: 1,
+          results: [{ id: 1, title: "Inception", vote_average: 8.4, poster_path: "/p.jpg" }],
+        },
+        loading: false,
+        error: null,
+      };
+    });
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter initialEntries={["/?genre=28"]}>
+          <Home />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByRole("heading", { name: "🎭 Action Movies" })).toBeInTheDocument();
+    expect(mockUseFetch).toHaveBeenCalledWith(expect.any(Function), "|28|1");
+  });
+
   it("renders numbered pagination and clears filters", async () => {
     mockUseFetch.mockImplementation((fetchFn: unknown, dependency: unknown) => {
       void fetchFn;
