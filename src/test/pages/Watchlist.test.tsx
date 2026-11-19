@@ -196,6 +196,34 @@ describe("Watchlist page", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "CLEAR" });
   });
 
+  it("renders a grey No poster placeholder for a saved movie without a poster", () => {
+    renderWithContext({
+      watchlist: [{ ...movie, poster_path: "" }],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    expect(screen.getByText("No poster")).toHaveClass("bg-gray-400");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
+
+  it("renders the existing poster and title alt text for a saved movie with a poster", () => {
+    renderWithContext({
+      watchlist: [movie],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    expect(screen.getByRole("img", { name: "Inception" })).toHaveAttribute(
+      "src",
+      "https://image.tmdb.org/t/p/w500/poster.jpg",
+    );
+    expect(screen.getByRole("img", { name: "Inception" })).toHaveClass(
+      "w-full",
+      "object-cover",
+    );
+  });
+
   it("shows the release year for dated movies and the bare title for undated ones", () => {
     const year = movie.release_date.slice(0, 4);
     renderWithContext({
