@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import { formatMovieTitle } from "../utils/formatMovieTitle";
 
 const WATCHLIST_SORT_KEY = "watchlist-sort";
-const SORT_OPTIONS = ["recently-added", "title", "rating"] as const;
+const SORT_OPTIONS = ["recently-added", "title", "rating", "release-year"] as const;
 type WatchlistSort = (typeof SORT_OPTIONS)[number];
 
 const isWatchlistSort = (value: string | null): value is WatchlistSort =>
@@ -37,12 +37,32 @@ const Watchlist = () => {
       return newestFirst;
     }
 
-    return newestFirst.sort((left, right) =>
-      sort === "title"
-        ? left.title.localeCompare(right.title)
-        : right.vote_average - left.vote_average,
-    );
+    return newestFirst.sort((left, right) => {
+      if (sort === "title") {
+        return left.title.localeCompare(right.title);
+      }
+
+      if (sort === "rating") {
+        return right.vote_average - left.vote_average;
+      }
+
+      if (!left.release_date && !right.release_date) {
+        return 0;
+      }
+      if (!left.release_date) {
+        return 1;
+      }
+      if (!right.release_date) {
+        return -1;
+      }
+
+      return right.release_date.localeCompare(left.release_date);
+    });
   }, [sort, watchlist]);
+
+  const averageRating = watchlist.length
+    ? watchlist.reduce((total, movie) => total + movie.vote_average, 0) / watchlist.length
+    : null;
 
   // TS LESSON: derived state — filter movies based on searchQuery
   // no API call needed — just filter existing array
@@ -58,8 +78,8 @@ const Watchlist = () => {
   };
 
   const heading = searchQuery.trim()
-    ? `Results for "${searchQuery}" in Watchlist (${filteredMovies.length})`
-    : `🎬 My Watchlist (${watchlist.length})`;
+    ? `Results for "${searchQuery}" in Watchlist (${filteredMovies.length})${averageRating === null ? "" : ` · Average rating: ${averageRating.toFixed(1)}`}`
+    : `🎬 My Watchlist (${watchlist.length})${averageRating === null ? "" : ` · Average rating: ${averageRating.toFixed(1)}`}`;
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -106,6 +126,7 @@ const Watchlist = () => {
               <option value="recently-added">Recently added</option>
               <option value="title">Title A to Z</option>
               <option value="rating">Rating highest first</option>
+              <option value="release-year">Release year</option>
             </select>
           </div>
         )}
