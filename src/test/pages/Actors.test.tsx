@@ -53,6 +53,109 @@ const renderActors = () =>
 describe("Actors page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("AC-1: renders the accessible sort control with Popularity selected by default", async () => {
+    mockGetPopularActors.mockResolvedValue(page1);
+    renderActors();
+
+    const sortControl = screen.getByRole("combobox", { name: "Sort actors" });
+    expect(sortControl).toHaveValue("popularity");
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+    expect(screen.getByRole("option", { name: "Popularity" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Name A to Z" })).toBeInTheDocument();
+    await screen.findByText("Tom Hanks");
+  });
+
+  it("AC-2: sorts all loaded actors by name with stable equal-name ordering", async () => {
+    mockGetPopularActors.mockResolvedValue({
+      ...page1,
+      results: [
+        { id: 1, name: "Zoë Actor", profile_path: null },
+        { id: 2, name: "Alex Actor", profile_path: null },
+        { id: 3, name: "Alex Actor", profile_path: null },
+      ],
+      total_pages: 1,
+    });
+    renderActors();
+
+    await screen.findByText("Zoë Actor");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort actors" }), "name");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alex Actor",
+      "Alex Actor",
+      "Zoë Actor",
+    ]);
+  });
+
+  it("AC-3: preserves paginated TMDB order for Popularity and restores it after switching back", async () => {
+    mockGetPopularActors.mockImplementation(async (page = 1) =>
+      page === 1 ? page1 : page2,
+    );
+    renderActors();
+
+    await screen.findByText("Tom Hanks");
+    await userEvent.click(screen.getByRole("button", { name: "Show more" }));
+    await screen.findByText("Meryl Streep");
+    const sortControl = screen.getByRole("combobox", { name: "Sort actors" });
+
+    await userEvent.selectOptions(sortControl, "name");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Meryl Streep",
+      "No Photo Actor",
+      "Tom Hanks",
+    ]);
+    await userEvent.selectOptions(sortControl, "popularity");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Tom Hanks",
+      "No Photo Actor",
+      "Meryl Streep",
+    ]);
+  });
+
+  it("AC-4: persists Name A to Z and restores the selected option and order after remounting", async () => {
+    mockGetPopularActors.mockResolvedValue({
+      ...page1,
+      results: [
+        { id: 1, name: "Zoë Actor", profile_path: null },
+        { id: 2, name: "Alex Actor", profile_path: null },
+      ],
+      total_pages: 1,
+    });
+    const firstRender = renderActors();
+
+    await screen.findByText("Zoë Actor");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort actors" }), "name");
+    expect(localStorage.getItem("actors-sort")).toBe("name");
+    firstRender.unmount();
+
+    renderActors();
+    await screen.findByText("Zoë Actor");
+    expect(screen.getByRole("combobox", { name: "Sort actors" })).toHaveValue("name");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alex Actor",
+      "Zoë Actor",
+    ]);
+  });
+
+  it("AC-5: falls back to Popularity for missing or invalid saved sort values", async () => {
+    mockGetPopularActors.mockResolvedValue(page1);
+
+    for (const savedSort of [null, "invalid"]) {
+      localStorage.clear();
+      if (savedSort) localStorage.setItem("actors-sort", savedSort);
+      const view = renderActors();
+
+      await screen.findByText("Tom Hanks");
+      expect(screen.getByRole("combobox", { name: "Sort actors" })).toHaveValue("popularity");
+      expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+        "Tom Hanks",
+        "No Photo Actor",
+      ]);
+      view.unmount();
+    }
   });
 
   it("shows the Popular Actors heading", async () => {
@@ -92,7 +195,7 @@ describe("Actors page", () => {
     expect(screen.queryByRole("button", { name: "Show more" })).toBeNull();
   });
 
-  it("renders the /actors route without requiring login", async () => {
+  it("AC-6: renders the /actors route without requiring login", async () => {
     mockGetPopularActors.mockResolvedValue(page1);
     render(
       <AuthContext.Provider value={loggedOut}>
