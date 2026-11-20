@@ -141,16 +141,21 @@ describe("Actors page", () => {
   });
 
   it("falls back to Popularity for missing or invalid saved sort values", async () => {
-    localStorage.setItem("actors-sort", "invalid");
     mockGetPopularActors.mockResolvedValue(page1);
-    renderActors();
 
-    await screen.findByText("Tom Hanks");
-    expect(screen.getByRole("combobox", { name: "Sort actors" })).toHaveValue("popularity");
-    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
-      "Tom Hanks",
-      "No Photo Actor",
-    ]);
+    for (const savedSort of [null, "invalid"]) {
+      localStorage.clear();
+      if (savedSort) localStorage.setItem("actors-sort", savedSort);
+      const view = renderActors();
+
+      await screen.findByText("Tom Hanks");
+      expect(screen.getByRole("combobox", { name: "Sort actors" })).toHaveValue("popularity");
+      expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+        "Tom Hanks",
+        "No Photo Actor",
+      ]);
+      view.unmount();
+    }
   });
 
   it("shows the Popular Actors heading", async () => {
