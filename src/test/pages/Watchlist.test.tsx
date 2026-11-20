@@ -149,37 +149,40 @@ describe("Watchlist page", () => {
   it("shows the total count in the headline when no search is active", () => {
     renderWithContext({
       watchlist: [
-        movie,
-        { ...movie, id: 2, title: "Untitled Project", release_date: "" },
-        { ...movie, id: 3, title: "Third Film", release_date: "" },
+        { ...movie, vote_average: 7.5 },
+        { ...movie, id: 2, title: "Untitled Project", release_date: "", vote_average: 8.1 },
+        { ...movie, id: 3, title: "Third Film", release_date: "", vote_average: 8.4 },
       ],
       dispatch: vi.fn(),
       isInWatchlist: () => true,
     });
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "🎬 My Watchlist (3)" }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: "🎬 My Watchlist (3) · Average rating: 8.0",
+      }),
     ).toBeInTheDocument();
   });
 
   it("shows the number of matching films in the headline while searching", async () => {
     renderWithContext({
-      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", release_date: "" }],
+      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", release_date: "", vote_average: 8.0 }],
       dispatch: vi.fn(),
       isInWatchlist: () => true,
     });
 
     const searchInput = screen.getByPlaceholderText("Search movies...");
     await userEvent.type(searchInput, "incep");
-    expect(
-      screen.getByRole("heading", { level: 1 }),
-    ).toHaveTextContent(/in Watchlist \(1\)$/);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /in Watchlist \(1\) · Average rating: 8\.2$/,
+    );
 
     await userEvent.clear(searchInput);
     await userEvent.type(searchInput, "zzz");
-    expect(
-      screen.getByRole("heading", { level: 1 }),
-    ).toHaveTextContent(/in Watchlist \(0\)$/);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /in Watchlist \(0\) · Average rating: 8\.2$/,
+    );
   });
 
   it("renders movies and supports clearing", async () => {
@@ -344,6 +347,28 @@ describe("Watchlist page", () => {
       "Recently added",
       "Title A to Z",
       "Rating highest first",
+      "Release year",
+    ]);
+  });
+
+  it("sorts movies by release year newest first, with undated movies last", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Undated", release_date: "" },
+      { ...movies[2], title: "Newest", release_date: "2024-06-01" },
+      { ...movies[0], id: 4, title: "Same year", release_date: "2024-01-01" },
+      { ...movies[1], id: 5, title: "Also undated", release_date: "" },
+    ];
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Newest (2024)",
+      "Same year (2024)",
+      "Older (1999)",
+      "Also undated",
+      "Undated",
     ]);
   });
 
@@ -405,6 +430,25 @@ describe("Watchlist page", () => {
       "Alpha (2010)",
       "Charlie (2010)",
       "Bravo (2010)",
+    ]);
+  });
+
+  it("persists and restores the Release year sort", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Newest", release_date: "2024-06-01" },
+    ];
+    const view = renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+
+    expect(localStorage.getItem("watchlist-sort")).toBe("release-year");
+    view.unmount();
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("release-year");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Newest (2024)",
+      "Older (1999)",
     ]);
   });
 
