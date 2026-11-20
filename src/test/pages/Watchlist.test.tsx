@@ -372,6 +372,27 @@ describe("Watchlist page", () => {
     ]);
   });
 
+  it("sorts movies by release year with undated movies last and insertion-order tie-breakers", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Undated", release_date: "" },
+      { ...movies[2], title: "Same year, first", release_date: "2024-01-01" },
+      { ...movies[0], id: 4, title: "Same year, second", release_date: "2024-01-01" },
+      { ...movies[1], id: 5, title: "Also undated", release_date: "" },
+    ];
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Same year, second (2024)",
+      "Same year, first (2024)",
+      "Older (1999)",
+      "Also undated",
+      "Undated",
+    ]);
+  });
+
   it("sorts movies by recently added order without changing persisted movie records", () => {
     const persistedMovies = [...movies];
     localStorage.setItem("watchlist:1", JSON.stringify(persistedMovies));
@@ -452,6 +473,24 @@ describe("Watchlist page", () => {
     ]);
   });
 
+  it("persists and restores the release-year sort after remounting", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Newest", release_date: "2024-06-01" },
+    ];
+    const view = renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+
+    view.unmount();
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("release-year");
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Newest (2024)",
+      "Older (1999)",
+    ]);
+  });
+
   it("falls back to Recently added for missing or invalid stored sort values", () => {
     const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
@@ -474,6 +513,44 @@ describe("Watchlist page", () => {
 
     expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
+  });
+
+  it("shows the overall average rating beside the total count", () => {
+    renderWithContext({
+      watchlist: [
+        { ...movie, vote_average: 7.5 },
+        { ...movie, id: 2, vote_average: 8.1 },
+        { ...movie, id: 3, vote_average: 8.4 },
+      ],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "🎬 My Watchlist (3) · Average rating: 8.0",
+    );
+  });
+
+  it("shows the overall average rating beside the matching count while searching", async () => {
+    renderWithContext({
+      watchlist: [movie, { ...movie, id: 2, title: "Untitled Project", vote_average: 8.0 }],
+      dispatch: vi.fn(),
+      isInWatchlist: () => true,
+    });
+
+    await userEvent.type(screen.getByPlaceholderText("Search movies..."), "incep");
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      'Results for "incep" in Watchlist (1) · Average rating: 8.2',
+    );
+  });
+
+  it("hides the average rating and sort dropdown for an empty watchlist", () => {
+    renderWithContext({ watchlist: [], dispatch: vi.fn(), isInWatchlist: () => false });
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("🎬 My Watchlist (0)");
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveTextContent(/Average rating/);
+    expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
   });
 
 });
