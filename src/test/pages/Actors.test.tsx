@@ -56,7 +56,7 @@ describe("Actors page", () => {
     localStorage.clear();
   });
 
-  it("renders the accessible sort control with Popularity selected by default", async () => {
+  it("AC-1: renders the accessible sort control with Popularity selected by default", async () => {
     mockGetPopularActors.mockResolvedValue(page1);
     renderActors();
 
@@ -68,7 +68,7 @@ describe("Actors page", () => {
     await screen.findByText("Tom Hanks");
   });
 
-  it("sorts all loaded actors by name with stable equal-name ordering", async () => {
+  it("AC-2: sorts all loaded actors by name with stable equal-name ordering", async () => {
     mockGetPopularActors.mockResolvedValue({
       ...page1,
       results: [
@@ -90,7 +90,7 @@ describe("Actors page", () => {
     ]);
   });
 
-  it("preserves paginated TMDB order for Popularity and restores it after switching back", async () => {
+  it("AC-3: preserves paginated TMDB order for Popularity and restores it after switching back", async () => {
     mockGetPopularActors.mockImplementation(async (page = 1) =>
       page === 1 ? page1 : page2,
     );
@@ -115,7 +115,7 @@ describe("Actors page", () => {
     ]);
   });
 
-  it("persists Name A to Z and restores the selected option and order after remounting", async () => {
+  it("AC-4: persists Name A to Z and restores the selected option and order after remounting", async () => {
     mockGetPopularActors.mockResolvedValue({
       ...page1,
       results: [
@@ -140,7 +140,7 @@ describe("Actors page", () => {
     ]);
   });
 
-  it("falls back to Popularity for missing or invalid saved sort values", async () => {
+  it("AC-5: falls back to Popularity for missing or invalid saved sort values", async () => {
     mockGetPopularActors.mockResolvedValue(page1);
 
     for (const savedSort of [null, "invalid"]) {
@@ -195,7 +195,7 @@ describe("Actors page", () => {
     expect(screen.queryByRole("button", { name: "Show more" })).toBeNull();
   });
 
-  it("renders the /actors route without requiring login", async () => {
+  it("AC-6: renders the /actors route without requiring login", async () => {
     mockGetPopularActors.mockResolvedValue(page1);
     render(
       <AuthContext.Provider value={loggedOut}>
