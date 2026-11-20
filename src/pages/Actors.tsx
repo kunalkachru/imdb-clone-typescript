@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getPopularActors } from "../services/tmdb";
 import type { Person } from "../types/person";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_TMDB_IMAGE_BASE_URL ?? "";
+const ACTORS_SORT_STORAGE_KEY = "actors-sort";
+
+type ActorsSort = "popularity" | "name";
+
+const getSavedSort = (): ActorsSort =>
+  localStorage.getItem(ACTORS_SORT_STORAGE_KEY) === "name" ? "name" : "popularity";
 
 const Actors = () => {
   const navigate = useNavigate();
@@ -14,6 +20,11 @@ const Actors = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<ActorsSort>(getSavedSort);
+
+  useEffect(() => {
+    localStorage.setItem(ACTORS_SORT_STORAGE_KEY, sort);
+  }, [sort]);
 
   // Each change of `page` fetches that TMDB page; page 1 replaces the list,
   // later pages are appended below the existing actors.
@@ -46,6 +57,11 @@ const Actors = () => {
     };
   }, [page]);
 
+  const displayedActors = useMemo(() => {
+    if (sort === "popularity") return actors;
+    return [...actors].sort((a, b) => a.name.localeCompare(b.name));
+  }, [actors, sort]);
+
   const handleSearch = () => {
     const cleaned = searchQuery.trim();
     if (cleaned) {
@@ -64,6 +80,21 @@ const Actors = () => {
       <div className="p-8">
         <h1 className="text-white text-4xl font-bold mb-8">Popular Actors</h1>
 
+        <div className="mb-8 flex items-center gap-3">
+          <label htmlFor="actors-sort" className="text-white font-semibold">
+            Sort actors
+          </label>
+          <select
+            id="actors-sort"
+            value={sort}
+            onChange={(event) => setSort(event.target.value as ActorsSort)}
+            className="rounded-lg bg-gray-700 px-3 py-2 text-white"
+          >
+            <option value="popularity">Popularity</option>
+            <option value="name">Name A to Z</option>
+          </select>
+        </div>
+
         {error && (
           <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
             {error}
@@ -71,7 +102,7 @@ const Actors = () => {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {actors.map((actor) => (
+          {displayedActors.map((actor) => (
             <div
               key={actor.id}
               className="bg-gray-800 rounded-lg overflow-hidden"
