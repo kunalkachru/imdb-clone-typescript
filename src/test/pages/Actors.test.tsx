@@ -79,6 +79,7 @@ describe("Actors page", () => {
     renderActors();
 
     expect(await screen.findAllByText("Known for")).toHaveLength(2);
+    await screen.findByText("Most Popular");
     expect(screen.getAllByText(/Most Popular/).map((movie) => movie.textContent)).toEqual([
       "Most Popular",
       "Second Most Popular",
