@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  getActorMovieCredits,
   getMovieDetail,
   getPopularActors,
   searchMovies,
@@ -71,6 +72,36 @@ describe("tmdb service", () => {
     const response = await getPopularActors();
     expect(response.results[0]?.name).toBe("Brad Pitt");
     expect(response.results[0]?.profile_path).toBe("/pitt.jpg");
+  });
+
+  it("requests an actor's movie credits with title, popularity, and release date", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        cast: [
+          {
+            id: 550,
+            title: "Fight Club",
+            popularity: 61.4,
+            release_date: "1999-10-15",
+          },
+        ],
+      }),
+    } as Response);
+
+    const credits = await getActorMovieCredits(287);
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+      "/person/287/movie_credits",
+    );
+    expect(credits).toEqual([
+      {
+        id: 550,
+        title: "Fight Club",
+        popularity: 61.4,
+        release_date: "1999-10-15",
+      },
+    ]);
   });
 
   it("rejects with the TMDB error when getPopularActors gets a 500", async () => {

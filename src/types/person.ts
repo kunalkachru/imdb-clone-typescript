@@ -4,3 +4,10 @@ export interface Person {
   name: string;
   profile_path: string | null;
 }
+
+export interface ActorMovieCredit {
+  id: number;
+  title: string;
+  popularity: number;
+  release_date: string;
+}
