@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getPopularActors } from "../services/tmdb";
-import type { Person } from "../types/person";
+import { getActorMovieCredits, getPopularActors } from "../services/tmdb";
+import type { ActorMovieCredit, Person } from "../types/person";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_TMDB_IMAGE_BASE_URL ?? "";
 const ACTORS_SORT_STORAGE_KEY = "actors-sort";
@@ -21,6 +21,7 @@ const Actors = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<ActorsSort>(getSavedSort);
+  const [knownFor, setKnownFor] = useState<Record<number, ActorMovieCredit[]>>({});
 
   useEffect(() => {
     localStorage.setItem(ACTORS_SORT_STORAGE_KEY, sort);
@@ -56,6 +57,36 @@ const Actors = () => {
       cancelled = true;
     };
   }, [page]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadKnownFor = async () => {
+      const credits = await Promise.all(
+        actors.map(async (actor) => {
+          try {
+            const movies = await getActorMovieCredits(actor.id);
+            return [
+              actor.id,
+              [...movies]
+                .sort((a, b) => b.popularity - a.popularity)
+                .slice(0, 3),
+            ] as const;
+          } catch {
+            return [actor.id, []] as const;
+          }
+        }),
+      );
+
+      if (!cancelled) setKnownFor(Object.fromEntries(credits));
+    };
+
+    if (actors.length > 0) loadKnownFor();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [actors]);
 
   const displayedActors = useMemo(() => {
     if (sort === "popularity") return actors;
@@ -125,6 +156,20 @@ const Actors = () => {
                 <h2 className="text-white font-semibold text-sm truncate">
                   {actor.name}
                 </h2>
+                <div className="mt-3">
+                  <h3 className="text-gray-300 text-xs font-semibold">Known for</h3>
+                  <div className="mt-1 flex flex-col gap-1">
+                    {knownFor[actor.id]?.map((movie) => (
+                      <span
+                        key={movie.id}
+                        className="text-gray-400 text-xs truncate"
+                        title={movie.release_date.slice(0, 4)}
+                      >
+                        {movie.title}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}

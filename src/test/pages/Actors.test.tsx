@@ -6,12 +6,14 @@ import Actors from "../../pages/Actors";
 import App from "../../App";
 import { AuthContext } from "../../context/AuthContextDef";
 import type { AuthContextType } from "../../types/auth";
-import { getPopularActors } from "../../services/tmdb";
+import { getActorMovieCredits, getPopularActors } from "../../services/tmdb";
 
 vi.mock("../../services/tmdb", () => ({
+  getActorMovieCredits: vi.fn(),
   getPopularActors: vi.fn(),
 }));
 
+const mockGetActorMovieCredits = vi.mocked(getActorMovieCredits);
 const mockGetPopularActors = vi.mocked(getPopularActors);
 
 const loggedOut: AuthContextType = {
@@ -53,7 +55,55 @@ const renderActors = () =>
 describe("Actors page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetActorMovieCredits.mockResolvedValue([]);
     localStorage.clear();
+  });
+
+  it("renders each actor's three most popular movies in a Known for row", async () => {
+    mockGetPopularActors.mockResolvedValue({
+      ...page1,
+      total_pages: 1,
+      results: [page1.results[0], page1.results[1]],
+    });
+    mockGetActorMovieCredits.mockImplementation(async (actorId) =>
+      actorId === 1
+        ? [
+            { id: 101, title: "Fourth Most Popular", popularity: 4, release_date: "2010-01-01" },
+            { id: 102, title: "Most Popular", popularity: 10, release_date: "2011-01-01" },
+            { id: 103, title: "Third Most Popular", popularity: 7, release_date: "2012-01-01" },
+            { id: 104, title: "Second Most Popular", popularity: 8, release_date: "2013-01-01" },
+          ]
+        : [{ id: 201, title: "Only Movie", popularity: 5, release_date: "2014-01-01" }],
+    );
+
+    renderActors();
+
+    expect(await screen.findAllByText("Known for")).toHaveLength(2);
+    await screen.findByText("Most Popular");
+    expect(screen.getAllByText(/Most Popular/).map((movie) => movie.textContent)).toEqual([
+      "Most Popular",
+      "Second Most Popular",
+      "Third Most Popular",
+    ]);
+    expect(screen.getByText("Only Movie")).toBeInTheDocument();
+    expect(screen.queryByText("Fourth Most Popular")).toBeNull();
+    expect(mockGetActorMovieCredits).toHaveBeenCalledWith(1);
+    expect(mockGetActorMovieCredits).toHaveBeenCalledWith(2);
+  });
+
+  it("shows each known-for movie release year in its tooltip", async () => {
+    mockGetPopularActors.mockResolvedValue({
+      ...page1,
+      total_pages: 1,
+      results: [page1.results[0]],
+    });
+    mockGetActorMovieCredits.mockResolvedValue([
+      { id: 301, title: "Tooltip Movie", popularity: 10, release_date: "1999-12-31" },
+    ]);
+
+    renderActors();
+
+    expect(await screen.findByTitle("1999")).toHaveTextContent("Tooltip Movie");
   });
 
   it("AC-1: renders the accessible sort control with Popularity selected by default", async () => {

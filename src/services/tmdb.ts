@@ -1,6 +1,6 @@
 import type { Movie } from "../types/movie";
 import type { MovieDetail } from "../types/movie";
-import type { Person } from "../types/person";
+import type { ActorMovieCredit, Person } from "../types/person";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
@@ -51,6 +51,11 @@ export const getTrendingMovies = (page = 1) =>
 
 export const getPopularActors = (page = 1) =>
   fetchFromTMDB<TMDBResponse<Person>>(`/person/popular?page=${page}`);
+
+export const getActorMovieCredits = (personId: number) =>
+  fetchFromTMDB<{ cast: ActorMovieCredit[] }>(
+    `/person/${personId}/movie_credits`,
+  ).then((response) => response.cast);
 
 export const searchMovies = (query: string, page = 1, genreId?: number) => {
   const genreQuery =
