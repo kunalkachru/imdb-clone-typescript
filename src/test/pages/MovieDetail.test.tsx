@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { act } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import MovieDetail from "../../pages/MovieDetail";
 import Home from "../../pages/Home";
@@ -39,6 +40,10 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail page", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const LocationProbe = () => {
     const location = useLocation();
     return <output data-testid="location">{location.pathname}{location.search}</output>;
@@ -82,6 +87,43 @@ describe("MovieDetail page", () => {
     renderMovieWithRating();
 
     expect(screen.getByText("⭐ 8.4 (12,345 votes)")).toBeInTheDocument();
+  });
+
+  it("AC-2: copies the current page URL and shows Link copied", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    renderMovieWithRating();
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+
+    expect(writeText).toHaveBeenCalledWith(window.location.href);
+    expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
+  });
+
+  it("AC-3: returns to Copy link at 2 seconds", async () => {
+    vi.useFakeTimers();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    renderMovieWithRating();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1999);
+    });
+    expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
   });
 
   it("shows invalid id message for malformed route params", () => {
