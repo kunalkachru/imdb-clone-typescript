@@ -168,4 +168,38 @@ describe("MovieDetail runtime", () => {
 
     expect(screen.queryByText("0 h 0 min")).not.toBeInTheDocument();
   });
+
+  it("AC-3: omits runtime for unknown, null, and zero runtimes", () => {
+    const runtimes = [undefined, null, 0];
+
+    runtimes.forEach((runtime) => {
+      mockUseFetch.mockReturnValue({
+        data: {
+          id: 1,
+          title: "Unavailable Runtime",
+          overview: "Overview",
+          poster_path: "/poster.jpg",
+          backdrop_path: "/backdrop.jpg",
+          release_date: "2020-01-01",
+          vote_average: 8.4,
+          vote_count: 100,
+          genre_ids: [],
+          runtime,
+        },
+        loading: false,
+        error: null,
+      });
+
+      const { container, unmount } = render(
+        <MemoryRouter initialEntries={["/movie/1"]}>
+          <Routes>
+            <Route path="/movie/:id" element={<MovieDetail />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(container.textContent).not.toMatch(/\d+ h \d+ min/);
+      unmount();
+    });
+  });
 });
