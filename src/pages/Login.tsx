@@ -15,6 +15,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [resetMessage, setResetMessage] = useState("");
 
   // TS LESSON: typing form input change event
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +33,11 @@ const Login = () => {
     if (isSuccess) {
       navigate("/");
     }
+  };
+
+  const handleForgotPassword = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setResetMessage("Password reset is not available in this demo");
   };
 
   // TS LESSON: comparing with enum value
@@ -83,6 +89,18 @@ const Login = () => {
               placeholder="••••••••"
               required
             />
+            <a
+              href="/login"
+              onClick={handleForgotPassword}
+              className="text-yellow-400 text-sm hover:underline self-start"
+            >
+              Forgot password?
+            </a>
+            {resetMessage && (
+              <p role="status" className="text-gray-400 text-sm">
+                {resetMessage}
+              </p>
+            )}
           </div>
 
           {/* Submit button */}

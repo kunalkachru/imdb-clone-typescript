@@ -91,6 +91,35 @@ describe("Login page", () => {
     expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
   });
 
+  it("renders the Forgot password link under the password field", () => {
+    renderLoginFlow();
+
+    const password = screen.getByPlaceholderText("••••••••");
+    const forgotPassword = screen.getByRole("link", {
+      name: "Forgot password?",
+    });
+
+    expect(
+      password.compareDocumentPosition(forgotPassword) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("shows the demo reset message without submitting or navigating when Forgot password is clicked", async () => {
+    renderLoginFlow();
+
+    await userEvent.click(
+      screen.getByRole("link", { name: "Forgot password?" }),
+    );
+
+    expect(
+      screen.getByText("Password reset is not available in this demo"),
+    ).toBeInTheDocument();
+    expect(loginUserMock).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "🎬 IMDBClone" })).toBeInTheDocument();
+    expect(screen.queryByText("Home page")).not.toBeInTheDocument();
+  });
+
   it("masks the password by default and toggles visibility without submitting", async () => {
     renderLoginFlow();
 
