@@ -106,6 +106,7 @@ describe("MovieDetail runtime", () => {
     );
 
     expect(screen.getByText("2 h 15 min")).toBeInTheDocument();
+    expect(screen.queryByText("2h 15m")).not.toBeInTheDocument();
     expect(screen.queryByText("135 min")).not.toBeInTheDocument();
   });
 
@@ -136,6 +137,7 @@ describe("MovieDetail runtime", () => {
     );
 
     expect(screen.getByText("0 h 45 min")).toBeInTheDocument();
+    expect(screen.queryByText("45m")).not.toBeInTheDocument();
   });
 
   it("omits runtime when runtime is zero", () => {
@@ -164,6 +166,6 @@ describe("MovieDetail runtime", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("0m")).not.toBeInTheDocument();
+    expect(screen.queryByText("0 h 0 min")).not.toBeInTheDocument();
   });
 });
