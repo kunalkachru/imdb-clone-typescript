@@ -20,7 +20,7 @@ const formatRuntime = (runtime: number) => {
   const hours = Math.floor(runtime / 60);
   const minutes = runtime % 60;
 
-  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  return `${hours} h ${minutes} min`;
 };
 
 const formatMoney = (amount: number) => {
