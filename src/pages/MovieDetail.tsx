@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { getMovieDetail } from "../services/tmdb";
@@ -53,6 +53,16 @@ const MovieDetail = () => {
   const movieId = Number(id);
   const { user } = useAuth();
   const [isSurveyExpanded, setIsSurveyExpanded] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const copyLinkTimeout = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (copyLinkTimeout.current !== undefined) {
+        window.clearTimeout(copyLinkTimeout.current);
+      }
+    };
+  }, []);
 
   // TS LESSON: consuming context — fully typed, no null checks needed
   const { dispatch, isInWatchlist } = useWatchlist();
@@ -133,6 +143,18 @@ const MovieDetail = () => {
     setIsSurveyExpanded(false);
   };
 
+  const handleCopyLink = () => {
+    void navigator.clipboard.writeText(window.location.href);
+    setIsLinkCopied(true);
+    if (copyLinkTimeout.current !== undefined) {
+      window.clearTimeout(copyLinkTimeout.current);
+    }
+    copyLinkTimeout.current = window.setTimeout(() => {
+      setIsLinkCopied(false);
+      copyLinkTimeout.current = undefined;
+    }, 2000);
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen">
       {/* Backdrop */}
@@ -151,6 +173,14 @@ const MovieDetail = () => {
           className="absolute top-6 left-6 bg-black/50 text-white px-4 py-2 rounded-lg hover:bg-black/80 transition-colors"
         >
           ← Back
+        </button>
+
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          className="absolute top-6 right-6 bg-gray-700/90 text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-600 transition-colors"
+        >
+          {isLinkCopied ? "Link copied" : "Copy link"}
         </button>
       </div>
 
