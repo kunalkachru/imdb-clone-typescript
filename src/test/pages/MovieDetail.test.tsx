@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import MovieDetail from "../../pages/MovieDetail";
 import Home from "../../pages/Home";
@@ -39,6 +39,12 @@ vi.mock("../../hooks/useAuth", () => ({
 }));
 
 describe("MovieDetail page", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    Reflect.deleteProperty(navigator, "clipboard");
+  });
+
   const LocationProbe = () => {
     const location = useLocation();
     return <output data-testid="location">{location.pathname}{location.search}</output>;
@@ -71,6 +77,43 @@ describe("MovieDetail page", () => {
       </MemoryRouter>,
     );
   };
+
+  it("renders an accessible Copy link button on a loaded movie", () => {
+    renderMovieWithRating();
+
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("copies the current movie URL and shows Link copied after activation", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    renderMovieWithRating();
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+
+    expect(writeText).toHaveBeenCalledWith(window.location.href);
+    expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
+  });
+
+  it("keeps Link copied visible before two seconds and restores Copy link at two seconds", async () => {
+    vi.useFakeTimers();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    renderMovieWithRating();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    act(() => vi.advanceTimersByTime(1999));
+    expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
 
   it("renders the rating with a thousands-separated vote count", () => {
     renderMovieWithRating();
