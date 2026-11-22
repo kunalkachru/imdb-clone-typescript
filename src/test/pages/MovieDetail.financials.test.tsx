@@ -58,8 +58,19 @@ describe("MovieDetail financials and original language", () => {
   it("renders the original language as a name", () => {
     renderMovie({ original_language: "en" });
 
-    expect(screen.getByText("Original language English")).toBeInTheDocument();
+    const releaseMetadata = screen.getByText("2020", { exact: true }).parentElement;
+
+    expect(releaseMetadata).toHaveTextContent("2020");
+    expect(releaseMetadata).toHaveTextContent("English");
+    expect(screen.queryByText("Original language English")).not.toBeInTheDocument();
     expect(screen.queryByText("Original language en")).not.toBeInTheDocument();
+  });
+
+  it("AC-2: omits original language when it is not provided", () => {
+    renderMovie({});
+
+    expect(screen.getByText("2020", { exact: true })).toBeInTheDocument();
+    expect(screen.queryByText(/Original language/)).not.toBeInTheDocument();
   });
 
   it("omits unknown or zero budget and box office independently", () => {
