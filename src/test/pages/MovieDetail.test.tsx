@@ -89,7 +89,13 @@ describe("MovieDetail page", () => {
     expect(screen.getByText("⭐ 8.4 (12,345 votes)")).toBeInTheDocument();
   });
 
-  it("AC-2: copies the current page URL and shows Link copied", async () => {
+  it("renders the Copy link control", () => {
+    renderMovieWithRating();
+
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("copies the current page URL and immediately shows Link copied", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -103,7 +109,7 @@ describe("MovieDetail page", () => {
     expect(screen.getByRole("button", { name: "Link copied" })).toBeInTheDocument();
   });
 
-  it("AC-3: returns to Copy link at 2 seconds", async () => {
+  it("keeps Link copied visible until 2 seconds and then restores Copy link", () => {
     vi.useFakeTimers();
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
