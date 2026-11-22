@@ -115,12 +115,19 @@ const renderApp = (initialEntries: string[] = ["/"]) =>
   );
 
 const expectSingleVisibleAttribution = () => {
-  expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
-  expect(screen.getByText("Movie data from TMDB")).toBeVisible();
+  const footers = screen.getAllByRole("contentinfo");
+  expect(footers).toHaveLength(1);
+
+  const footer = footers[0];
+  expect(footer).toHaveTextContent("Movie data from TMDB");
+  expect(footer).toHaveTextContent(`© ${new Date().getFullYear()} IMDb Clone`);
+  const backToTop = screen.getByRole("link", { name: "Back to top" });
+  expect(backToTop).toBeVisible();
+  expect(backToTop).toHaveAttribute("href", "#");
 };
 
 describe("application route shell", () => {
-  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
+  it("renders exactly one TMDB attribution footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
