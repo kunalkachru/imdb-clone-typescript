@@ -174,6 +174,14 @@ const MovieDetail = () => {
         >
           ← Back
         </button>
+
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          className="absolute top-6 right-6 bg-gray-700/90 text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-600 transition-colors"
+        >
+          {isLinkCopied ? "Link copied" : "Copy link"}
+        </button>
       </div>
 
       {/* Content */}
@@ -267,13 +275,6 @@ const MovieDetail = () => {
               }`}
             >
               {alreadyAdded ? "Remove from Watchlist" : "Add to Watchlist"}
-            </button>
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              className="w-fit px-6 py-3 rounded-lg font-bold text-white bg-gray-700 hover:bg-gray-600 transition-colors"
-            >
-              {isLinkCopied ? "Link copied" : "Copy link"}
             </button>
           </div>
         </div>
