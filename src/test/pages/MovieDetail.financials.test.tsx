@@ -66,7 +66,7 @@ describe("MovieDetail financials and original language", () => {
     expect(screen.queryByText("Original language en")).not.toBeInTheDocument();
   });
 
-  it("AC-2: omits original language when it is not provided", () => {
+  it("omits the original language when it is missing", () => {
     renderMovie({});
 
     expect(screen.getByText("2020", { exact: true })).toBeInTheDocument();
