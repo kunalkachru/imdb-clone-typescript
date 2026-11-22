@@ -184,6 +184,11 @@ const MovieDetail = () => {
               <span className="text-gray-300">
                 {movie.release_date?.split("-")[0]}
               </span>
+              {movie.original_language && (
+                <span className="text-gray-300">
+                  {getLanguageName(movie.original_language)}
+                </span>
+              )}
               {/* TS LESSON: optional field — runtime might not exist */}
               {movie.runtime != null && movie.runtime > 0 && (
                 <span className="text-gray-300">{formatRuntime(movie.runtime)}</span>
@@ -196,9 +201,6 @@ const MovieDetail = () => {
               )}
               {movie.revenue != null && movie.revenue > 0 && (
                 <span>Box office {formatMoney(movie.revenue)}</span>
-              )}
-              {movie.original_language && (
-                <span>Original language {getLanguageName(movie.original_language)}</span>
               )}
             </div>
 
