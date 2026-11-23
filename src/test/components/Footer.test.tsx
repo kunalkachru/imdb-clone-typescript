@@ -4,15 +4,34 @@ import { describe, expect, it, vi } from "vitest";
 import Footer from "../../components/Footer";
 
 describe("Footer", () => {
-  it("AC-1: renders the current-year IMDb Clone copyright", () => {
-    render(<Footer />);
+  it("AC-1: generates the copyright year at render time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-06-15T12:00:00.000Z"));
 
-    expect(
-      screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`),
-    ).toBeVisible();
+    const { rerender } = render(<Footer />);
+    expect(screen.getByText("© 2025 IMDb Clone")).toBeVisible();
+
+    vi.setSystemTime(new Date("2026-01-01T12:00:00.000Z"));
+    rerender(<Footer />);
+    expect(screen.getByText("© 2026 IMDb Clone")).toBeVisible();
+
+    vi.useRealTimers();
   });
 
-  it("AC-3: links back to the top of the application shell", async () => {
+  it("renders the exact copyright text beside the attribution and link", () => {
+    render(<Footer />);
+
+    const copyright = screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`);
+    const attribution = screen.getByText("Movie data from TMDB");
+    const link = screen.getByRole("link", { name: "Back to top" });
+
+    expect(copyright).toBeVisible();
+    expect(attribution).toBeVisible();
+    expect(link).toBeVisible();
+    expect(attribution.nextElementSibling).toBe(link);
+  });
+
+  it("AC-3: links back to and activates the top of the application shell", async () => {
     const user = userEvent.setup();
     const scrollIntoView = vi.fn();
     const top = document.createElement("div");

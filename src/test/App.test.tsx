@@ -116,7 +116,9 @@ const renderApp = (initialEntries: string[] = ["/"]) =>
 
 const expectSingleVisibleAttribution = () => {
   expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+  expect(screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`)).toBeVisible();
   expect(screen.getByText("Movie data from TMDB")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Back to top" })).toBeVisible();
 };
 
 describe("application route shell", () => {
@@ -126,9 +128,7 @@ describe("application route shell", () => {
 
     for (const route of configuredRoutes) {
       const { unmount } = renderApp([route]);
-      expect(screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`)).toBeVisible();
-      expect(screen.getByText("Movie data from TMDB")).toBeVisible();
-      expect(screen.getByRole("link", { name: "Back to top" })).toBeVisible();
+      expectSingleVisibleAttribution();
       unmount();
     }
   });
