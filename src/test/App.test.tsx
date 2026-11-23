@@ -137,14 +137,13 @@ const expectSingleVisibleAttribution = () => {
   const footer = screen.getByRole("contentinfo");
   const attribution = screen.getByText("Movie data from TMDB");
   const copyright = screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`);
-  const backToTopLinks = screen.getAllByRole("link", { name: "Back to top" });
-  const backToTop = backToTopLinks[0];
+  const backToTopControls = screen.getAllByRole("button", { name: "Back to top" });
+  const backToTop = backToTopControls[0];
 
   expect(attribution).toBeVisible();
   expect(copyright).toBeVisible();
-  expect(backToTopLinks).toHaveLength(1);
+  expect(backToTopControls).toHaveLength(1);
   expect(backToTop).toBeVisible();
-  expect(backToTop).toHaveAttribute("href", "#top");
   expect(footer).toContainElement(attribution);
   expect(footer).toContainElement(copyright);
   expect(footer).toContainElement(backToTop);
@@ -162,6 +161,18 @@ describe("application route shell", () => {
       expectSingleVisibleAttribution();
       unmount();
     }
+  });
+
+  it("keeps the Back to top control on the current route when activated", async () => {
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const user = userEvent.setup();
+    renderApp(["/movie/1"]);
+
+    await user.click(screen.getByRole("button", { name: "Back to top" }));
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    expect(screen.getByRole("heading", { name: /Test Movie/ })).toBeVisible();
+    scrollTo.mockRestore();
   });
 
   it("keeps exactly one TMDB attribution footer after navigating between configured routes", async () => {
