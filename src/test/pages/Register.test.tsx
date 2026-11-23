@@ -34,6 +34,28 @@ describe("Register page", () => {
     localStorage.clear();
   });
 
+  it("shows the password requirement hint before submission", () => {
+    renderRegisterFlow();
+
+    expect(
+      screen.getByText(
+        "Use at least 8 characters, including a letter and a digit.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the password requirement hint visible while entering a password", async () => {
+    renderRegisterFlow();
+
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "secret99");
+
+    expect(
+      screen.getByText(
+        "Use at least 8 characters, including a letter and a digit.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("masks the password by default and toggles visibility without submitting", async () => {
     renderRegisterFlow();
 

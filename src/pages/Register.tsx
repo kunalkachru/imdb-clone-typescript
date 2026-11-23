@@ -106,6 +106,9 @@ const Register = () => {
               placeholder="••••••••"
               required
             />
+            <p className="text-gray-400 text-sm">
+              Use at least 8 characters, including a letter and a digit.
+            </p>
             <StrengthMeter value={formData.password} />
             {passwordError && (
               <p role="alert" className="text-red-400 text-sm">
