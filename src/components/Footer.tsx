@@ -3,7 +3,12 @@ const Footer = () => (
     <p className="footer-content">
       <span>Movie data from TMDB</span>
       <span>© {new Date().getFullYear()} IMDb Clone</span>
-      <a href="#top">Back to top</a>
+      <button
+        type="button"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        Back to top
+      </button>
     </p>
   </footer>
 );
