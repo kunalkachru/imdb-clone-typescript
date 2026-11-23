@@ -91,10 +91,14 @@ describe("Register page", () => {
     expect(weakLabel).not.toBe(strongLabel);
   });
 
-  it("renders the confirm password field and rejects mismatched passwords", async () => {
+  it("renders the Confirm password field", () => {
     renderRegisterFlow();
 
     expect(screen.getByLabelText("Confirm password")).toBeInTheDocument();
+  });
+
+  it("rejects mismatched passwords without registering", async () => {
+    renderRegisterFlow();
 
     await userEvent.type(screen.getByPlaceholderText("John Doe"), "John");
     await userEvent.type(
@@ -109,7 +113,7 @@ describe("Register page", () => {
     expect(registerUserMock).not.toHaveBeenCalled();
   });
 
-  it("registers matching passwords without sending confirmation data", async () => {
+  it("registers matching passwords without sending confirmation", async () => {
     registerUserMock.mockResolvedValueOnce({
       user: { id: 5, name: "John", email: "john@example.com", createdAt: "now" },
       token: "token",
