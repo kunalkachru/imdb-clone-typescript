@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HashRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Footer from "../../components/Footer";
 
@@ -45,6 +46,29 @@ describe("Footer", () => {
     expect(link).toHaveAttribute("href", "#app-shell-top");
     await user.click(link);
     expect(window.location.hash).toBe("#app-shell-top");
+
+    top.remove();
+  });
+
+  it("keeps the current route when activated inside HashRouter", async () => {
+    window.location.hash = "#/movie/1";
+    const user = userEvent.setup();
+    const scrollIntoView = vi.fn();
+    const top = document.createElement("div");
+    top.id = "app-shell-top";
+    top.scrollIntoView = scrollIntoView;
+    document.body.append(top);
+
+    render(
+      <HashRouter>
+        <Footer />
+      </HashRouter>,
+    );
+
+    await user.click(screen.getByRole("link", { name: "Back to top" }));
+
+    expect(window.location.hash).toBe("#/movie/1");
+    expect(scrollIntoView).toHaveBeenCalledOnce();
 
     top.remove();
   });
