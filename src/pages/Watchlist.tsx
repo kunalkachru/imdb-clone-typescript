@@ -107,7 +107,7 @@ const Watchlist = () => {
         {watchlist.length > 0 && (
           <div className="mb-8">
             <label htmlFor="watchlist-sort" className="text-white font-semibold mr-3">
-              Sort watchlist
+              Sort by
             </label>
             <select
               id="watchlist-sort"
@@ -124,9 +124,9 @@ const Watchlist = () => {
               className="px-4 py-2 rounded-lg bg-gray-700 text-white"
             >
               <option value="recently-added">Recently added</option>
-              <option value="title">Title A to Z</option>
-              <option value="rating">Rating highest first</option>
-              <option value="release-year">Release year</option>
+              <option value="title">Title A–Z</option>
+              <option value="rating">Rating (high to low)</option>
+              <option value="release-year">Release date (newest)</option>
             </select>
           </div>
         )}

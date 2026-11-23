@@ -341,13 +341,13 @@ describe("Watchlist page", () => {
   it("renders the sort dropdown with Recently added selected by default", () => {
     renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    const sort = screen.getByRole("combobox", { name: "Sort watchlist" });
+    const sort = screen.getByRole("combobox", { name: "Sort by" });
     expect(sort).toHaveValue("recently-added");
     expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
       "Recently added",
-      "Title A to Z",
-      "Rating highest first",
-      "Release year",
+      "Title A–Z",
+      "Rating (high to low)",
+      "Release date (newest)",
     ]);
   });
 
@@ -361,7 +361,7 @@ describe("Watchlist page", () => {
     ];
     renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
 
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Newest (2024)",
@@ -382,7 +382,7 @@ describe("Watchlist page", () => {
     ];
     renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
 
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Same year, second (2024)",
@@ -414,7 +414,7 @@ describe("Watchlist page", () => {
     ];
     renderWithContext({ watchlist: tiedTitleMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "title");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "title");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Alpha (2010)",
       "Same (2010)",
@@ -430,7 +430,7 @@ describe("Watchlist page", () => {
     ];
     renderWithContext({ watchlist: tiedRatingMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "rating");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "rating");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Alpha (2010)",
       "Charlie (2010)",
@@ -440,13 +440,13 @@ describe("Watchlist page", () => {
 
   it("persists the selected sort and restores it after reload", async () => {
     const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "rating");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "rating");
 
     expect(localStorage.getItem("watchlist-sort")).toBe("rating");
     view.unmount();
     renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("rating");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("rating");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Alpha (2010)",
       "Charlie (2010)",
@@ -460,13 +460,14 @@ describe("Watchlist page", () => {
       { ...movies[1], title: "Newest", release_date: "2024-06-01" },
     ];
     const view = renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
 
     expect(localStorage.getItem("watchlist-sort")).toBe("release-year");
     view.unmount();
     renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("release-year");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("release-year");
+    expect(screen.getByRole("option", { name: "Release date (newest)", selected: true })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Newest (2024)",
       "Older (1999)",
@@ -479,12 +480,12 @@ describe("Watchlist page", () => {
       { ...movies[1], title: "Newest", release_date: "2024-06-01" },
     ];
     const view = renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort watchlist" }), "release-year");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
 
     view.unmount();
     renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("release-year");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("release-year");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Newest (2024)",
       "Older (1999)",
@@ -494,7 +495,7 @@ describe("Watchlist page", () => {
   it("falls back to Recently added for missing or invalid stored sort values", () => {
     const view = renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("recently-added");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("recently-added");
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
       "Charlie (2010)",
       "Alpha (2010)",
@@ -505,13 +506,13 @@ describe("Watchlist page", () => {
     localStorage.setItem("watchlist-sort", "not-a-sort");
     renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
 
-    expect(screen.getByRole("combobox", { name: "Sort watchlist" })).toHaveValue("recently-added");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("recently-added");
   });
 
   it("hides the sort dropdown for an empty watchlist", () => {
     renderWithContext({ watchlist: [], dispatch: vi.fn(), isInWatchlist: () => false });
 
-    expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Sort by" })).not.toBeInTheDocument();
     expect(screen.getByText("No movies in your watchlist yet")).toBeInTheDocument();
   });
 
@@ -550,7 +551,7 @@ describe("Watchlist page", () => {
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("🎬 My Watchlist (0)");
     expect(screen.getByRole("heading", { level: 1 })).not.toHaveTextContent(/Average rating/);
-    expect(screen.queryByRole("combobox", { name: "Sort watchlist" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Sort by" })).not.toBeInTheDocument();
   });
 
 });
