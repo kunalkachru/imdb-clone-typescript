@@ -122,7 +122,7 @@ const expectSingleVisibleFooter = () => {
 };
 
 describe("application route shell", () => {
-  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
+  it("renders the current-year copyright and footer controls on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
@@ -133,7 +133,7 @@ describe("application route shell", () => {
     }
   });
 
-  it("keeps exactly one TMDB attribution footer after navigating between configured routes", async () => {
+  it("keeps exactly one complete footer after navigating between configured routes", async () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
     const user = userEvent.setup();
@@ -154,7 +154,7 @@ describe("application route shell", () => {
     expectSingleVisibleFooter();
   });
 
-  it("AC-2: scrolls to the top without changing the URL or route", async () => {
+  it("scrolls to the top without changing the URL or route", async () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
     const user = userEvent.setup();
