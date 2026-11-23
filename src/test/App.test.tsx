@@ -120,6 +120,19 @@ const expectSingleVisibleAttribution = () => {
 };
 
 describe("application route shell", () => {
+  it("AC-2: renders the copyright, attribution, and back-to-top link on each configured route", () => {
+    localStorage.setItem("user", JSON.stringify(testUser));
+    localStorage.setItem("token", "test-token");
+
+    for (const route of configuredRoutes) {
+      const { unmount } = renderApp([route]);
+      expect(screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`)).toBeVisible();
+      expect(screen.getByText("Movie data from TMDB")).toBeVisible();
+      expect(screen.getByRole("link", { name: "Back to top" })).toBeVisible();
+      unmount();
+    }
+  });
+
   it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");

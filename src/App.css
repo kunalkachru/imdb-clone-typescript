@@ -21,6 +21,14 @@
   text-align: center;
 }
 
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
