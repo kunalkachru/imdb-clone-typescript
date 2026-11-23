@@ -51,6 +51,7 @@ describe("Register helper text", () => {
     expect(screen.getByText("Full Name")).toBeInTheDocument();
     expect(screen.getByText("Email")).toBeInTheDocument();
     expect(screen.getByText("Password")).toBeInTheDocument();
+    expect(screen.getByText("Confirm password")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Create Account" }),
       "Create Account button should be present and enabled",

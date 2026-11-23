@@ -91,6 +91,49 @@ describe("Register page", () => {
     expect(weakLabel).not.toBe(strongLabel);
   });
 
+  it("renders the confirm password field and rejects mismatched passwords", async () => {
+    renderRegisterFlow();
+
+    expect(screen.getByLabelText("Confirm password")).toBeInTheDocument();
+
+    await userEvent.type(screen.getByPlaceholderText("John Doe"), "John");
+    await userEvent.type(
+      screen.getByPlaceholderText("john@example.com"),
+      "john@example.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), strongSample);
+    await userEvent.type(screen.getByLabelText("Confirm password"), "different");
+    await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Passwords do not match");
+    expect(registerUserMock).not.toHaveBeenCalled();
+  });
+
+  it("registers matching passwords without sending confirmation data", async () => {
+    registerUserMock.mockResolvedValueOnce({
+      user: { id: 5, name: "John", email: "john@example.com", createdAt: "now" },
+      token: "token",
+    });
+
+    renderRegisterFlow();
+
+    await userEvent.type(screen.getByPlaceholderText("John Doe"), "John");
+    await userEvent.type(
+      screen.getByPlaceholderText("john@example.com"),
+      "john@example.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), strongSample);
+    await userEvent.type(screen.getByLabelText("Confirm password"), strongSample);
+    await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
+
+    await waitFor(() => expect(screen.getByText("Home page")).toBeInTheDocument());
+    expect(registerUserMock).toHaveBeenCalledWith({
+      name: "John",
+      email: "john@example.com",
+      password: strongSample,
+    });
+  });
+
   it("blocks a weak password with an alert and registers a strong one", async () => {
     registerUserMock.mockResolvedValueOnce({
       user: { id: 4, name: "John", email: "john@example.com", createdAt: "now" },
@@ -105,6 +148,7 @@ describe("Register page", () => {
       "john@example.com",
     );
     await userEvent.type(screen.getByPlaceholderText("••••••••"), weakSample);
+    await userEvent.type(screen.getByLabelText("Confirm password"), weakSample);
     await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
     expect(
@@ -115,6 +159,8 @@ describe("Register page", () => {
 
     await userEvent.clear(screen.getByPlaceholderText("••••••••"));
     await userEvent.type(screen.getByPlaceholderText("••••••••"), strongSample);
+    await userEvent.clear(screen.getByLabelText("Confirm password"));
+    await userEvent.type(screen.getByLabelText("Confirm password"), strongSample);
     await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
     await waitFor(() => expect(screen.getByText("Home page")).toBeInTheDocument());
@@ -132,6 +178,7 @@ describe("Register page", () => {
       "john@example.com",
     );
     await userEvent.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await userEvent.type(screen.getByLabelText("Confirm password"), "password123");
     await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
     await waitFor(() =>
@@ -154,6 +201,7 @@ describe("Register page", () => {
       "john@example.com",
     );
     await userEvent.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await userEvent.type(screen.getByLabelText("Confirm password"), "password123");
     await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
     await waitFor(() => expect(screen.getByText("Home page")).toBeInTheDocument());
@@ -170,6 +218,7 @@ describe("Register page", () => {
       "john@example.com",
     );
     await userEvent.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await userEvent.type(screen.getByLabelText("Confirm password"), "password123");
     await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
 
     await waitFor(() =>

@@ -18,7 +18,11 @@ const Register = () => {
     email: "",
     password: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmationError, setConfirmationError] = useState<string | null>(
+    null,
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,6 +34,11 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (formData.password !== confirmPassword) {
+      setConfirmationError("Passwords do not match");
+      return;
+    }
+    setConfirmationError(null);
     const rules = checkPasswordRules(formData.password);
     if (!rules.ok) {
       setPasswordError(`Password needs ${rules.failures.join(", ")}.`);
@@ -110,6 +119,30 @@ const Register = () => {
             {passwordError && (
               <p role="alert" className="text-red-400 text-sm">
                 {passwordError}
+              </p>
+            )}
+          </div>
+
+          {/* Confirm password */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="confirm-password"
+              className="text-gray-300 text-sm font-medium"
+            >
+              Confirm password
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="px-4 py-3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500"
+            />
+            {confirmationError && (
+              <p role="alert" className="text-red-400 text-sm">
+                {confirmationError}
               </p>
             )}
           </div>
