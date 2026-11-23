@@ -192,4 +192,29 @@ describe("application route shell", () => {
     expect(screen.getByRole("link", { name: /Test Movie/ })).toHaveAttribute("href", "#/movie/1");
     unmount();
   });
+
+  it("keeps the HashRouter route when Back to top is activated", async () => {
+    localStorage.setItem("user", JSON.stringify(testUser));
+    localStorage.setItem("token", "test-token");
+    window.location.hash = "/watchlist";
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <HashRouter>
+        <AuthProvider>
+          <WatchlistProvider>
+            <App />
+          </WatchlistProvider>
+        </AuthProvider>
+      </HashRouter>,
+    );
+    const top = document.getElementById("top");
+    const scrollIntoView = vi.fn();
+    top!.scrollIntoView = scrollIntoView;
+
+    await user.click(screen.getByRole("link", { name: "Back to top" }));
+
+    expect(window.location.hash).toBe("#/watchlist");
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth" });
+    unmount();
+  });
 });
