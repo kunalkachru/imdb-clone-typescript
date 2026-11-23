@@ -1,6 +1,10 @@
 const Footer = () => (
   <footer>
-    <p>Movie data from TMDB</p>
+    <p className="footer-content">
+      <span>Movie data from TMDB</span>
+      <span>© {new Date().getFullYear()} IMDb Clone</span>
+      <a href="#top">Back to top</a>
+    </p>
   </footer>
 );
 

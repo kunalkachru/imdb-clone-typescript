@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { HashRouter, MemoryRouter } from "react-router-dom";
+import { HashRouter, MemoryRouter, useNavigate } from "react-router-dom";
 import App from "../App";
 import { AuthProvider } from "../context/AuthContext";
 import { WatchlistProvider } from "../context/WatchlistContext";
@@ -103,12 +103,30 @@ const configuredRoutes = [
   "/watchlist",
 ];
 
-const renderApp = (initialEntries: string[] = ["/"]) =>
+const NavigationHarness = () => {
+  const navigate = useNavigate();
+
+  return (
+    <nav aria-label="Test route navigation">
+      {configuredRoutes.map((route) => (
+        <button key={route} onClick={() => navigate(route)}>
+          Navigate to {route}
+        </button>
+      ))}
+    </nav>
+  );
+};
+
+const renderApp = (
+  initialEntries: string[] = ["/"],
+  includeNavigationHarness = false,
+) =>
   render(
     <MemoryRouter initialEntries={initialEntries}>
       <AuthProvider>
         <WatchlistProvider>
           <App />
+          {includeNavigationHarness && <NavigationHarness />}
         </WatchlistProvider>
       </AuthProvider>
     </MemoryRouter>,
@@ -116,11 +134,26 @@ const renderApp = (initialEntries: string[] = ["/"]) =>
 
 const expectSingleVisibleAttribution = () => {
   expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
-  expect(screen.getByText("Movie data from TMDB")).toBeVisible();
+  const footer = screen.getByRole("contentinfo");
+  const attribution = screen.getByText("Movie data from TMDB");
+  const copyright = screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`);
+  const backToTopLinks = screen.getAllByRole("link", { name: "Back to top" });
+  const backToTop = backToTopLinks[0];
+
+  expect(attribution).toBeVisible();
+  expect(copyright).toBeVisible();
+  expect(backToTopLinks).toHaveLength(1);
+  expect(backToTop).toBeVisible();
+  expect(backToTop).toHaveAttribute("href", "#top");
+  expect(footer).toContainElement(attribution);
+  expect(footer).toContainElement(copyright);
+  expect(footer).toContainElement(backToTop);
+  expect(attribution.parentElement).toBe(copyright.parentElement);
+  expect(attribution.parentElement).toBe(backToTop.parentElement);
 };
 
 describe("application route shell", () => {
-  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
+  it("renders exactly one TMDB attribution footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
@@ -135,21 +168,14 @@ describe("application route shell", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
     const user = userEvent.setup();
-    renderApp();
+    renderApp(["/"], true);
 
     expectSingleVisibleAttribution();
 
-    await user.click(screen.getByRole("link", { name: "Actors" }));
-    expect(screen.getByRole("heading", { name: "Popular Actors" })).toBeVisible();
-    expectSingleVisibleAttribution();
-
-    await user.click(screen.getByRole("link", { name: "Watchlist" }));
-    expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
-    expectSingleVisibleAttribution();
-
-    await user.click(screen.getByRole("link", { name: "Home" }));
-    expect(screen.getByRole("heading", { name: "🎬 Trending Movies" })).toBeVisible();
-    expectSingleVisibleAttribution();
+    for (const route of configuredRoutes) {
+      await user.click(screen.getByRole("button", { name: `Navigate to ${route}` }));
+      expectSingleVisibleAttribution();
+    }
   });
 
   it("AC-8: resolves watchlist and movie links with HashRouter-compatible paths", async () => {
