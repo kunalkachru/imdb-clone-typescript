@@ -422,6 +422,18 @@ describe("Watchlist page", () => {
     ]);
   });
 
+  it("sorts movies by title A–Z", async () => {
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "title");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alpha (2010)",
+      "Bravo (2010)",
+      "Charlie (2010)",
+    ]);
+  });
+
   it("sorts movies by rating highest first with recently added tie-breakers", async () => {
     const tiedRatingMovies = [
       { ...movies[0], vote_average: 8.1 },
@@ -435,6 +447,37 @@ describe("Watchlist page", () => {
       "Alpha (2010)",
       "Charlie (2010)",
       "Bravo (2010)",
+    ]);
+  });
+
+  it("sorts movies by rating high to low", async () => {
+    renderWithContext({ watchlist: movies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "rating");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Alpha (2010)",
+      "Charlie (2010)",
+      "Bravo (2010)",
+    ]);
+  });
+
+  it("sorts movies by release date newest first with undated movies last", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Undated", release_date: "" },
+      { ...movies[2], title: "Newest", release_date: "2024-06-01" },
+      { ...movies[0], id: 4, title: "Also undated", release_date: "" },
+    ];
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Newest (2024)",
+      "Older (1999)",
+      "Also undated",
+      "Undated",
     ]);
   });
 
@@ -463,6 +506,27 @@ describe("Watchlist page", () => {
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
 
     expect(localStorage.getItem("watchlist-sort")).toBe("release-year");
+    view.unmount();
+    renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("release-year");
+    expect(screen.getByRole("option", { name: "Release date (newest)", selected: true })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Newest (2024)",
+      "Older (1999)",
+    ]);
+  });
+
+  it("persists and restores the Release date sort", async () => {
+    const releaseDatedMovies = [
+      { ...movies[0], title: "Older", release_date: "1999-01-01" },
+      { ...movies[1], title: "Newest", release_date: "2024-06-01" },
+    ];
+    const view = renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
+
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "release-year");
+    expect(localStorage.getItem("watchlist-sort")).toBe("release-year");
+
     view.unmount();
     renderWithContext({ watchlist: releaseDatedMovies, dispatch: vi.fn(), isInWatchlist: () => true });
 
