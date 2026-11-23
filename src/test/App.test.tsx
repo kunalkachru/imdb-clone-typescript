@@ -114,42 +114,59 @@ const renderApp = (initialEntries: string[] = ["/"]) =>
     </MemoryRouter>,
   );
 
-const expectSingleVisibleAttribution = () => {
+const expectSingleVisibleFooter = () => {
   expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+  expect(screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`)).toBeVisible();
   expect(screen.getByText("Movie data from TMDB")).toBeVisible();
 };
 
 describe("application route shell", () => {
-  it("AC-9: renders exactly one TMDB attribution footer on each configured route", () => {
+  it("renders exactly one current-year footer on each configured route", () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
 
     for (const route of configuredRoutes) {
       const { unmount } = renderApp([route]);
-      expectSingleVisibleAttribution();
+      expectSingleVisibleFooter();
       unmount();
     }
   });
 
-  it("keeps exactly one TMDB attribution footer after navigating between configured routes", async () => {
+  it("renders a Back to top link targeting the top anchor next to the TMDB attribution", () => {
+    const { unmount } = renderApp();
+
+    const attribution = screen.getByText("Movie data from TMDB");
+    const footer = screen.getByRole("contentinfo");
+    const backToTop = screen.getByRole("link", { name: "Back to top" });
+
+    expect(attribution).toBeVisible();
+    expect(backToTop).toBeVisible();
+    expect(backToTop).toHaveAttribute("href", "#top");
+    expect(footer).toContainElement(attribution);
+    expect(footer).toContainElement(backToTop);
+    expect(document.getElementById("top")).toBeInTheDocument();
+    unmount();
+  });
+
+  it("keeps exactly one complete footer after navigating between configured routes", async () => {
     localStorage.setItem("user", JSON.stringify(testUser));
     localStorage.setItem("token", "test-token");
     const user = userEvent.setup();
     renderApp();
 
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Actors" }));
     expect(screen.getByRole("heading", { name: "Popular Actors" })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Watchlist" }));
     expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Home" }));
     expect(screen.getByRole("heading", { name: "🎬 Trending Movies" })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
   });
 
   it("AC-8: resolves watchlist and movie links with HashRouter-compatible paths", async () => {

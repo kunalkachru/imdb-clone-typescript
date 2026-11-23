@@ -11,7 +11,7 @@ import Footer from "./components/Footer";
 function App() {
   return (
     <div className="app-shell">
-      <main className="app-main">
+      <main id="top" className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetail />} />

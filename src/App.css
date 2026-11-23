@@ -21,6 +21,22 @@
   text-align: center;
 }
 
+.footer-content,
+.footer-attribution {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.footer-content p {
+  margin: 0;
+}
+
+.footer-attribution a {
+  color: inherit;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
