@@ -166,12 +166,22 @@ describe("application route shell", () => {
   it("keeps the Back to top control on the current route when activated", async () => {
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     const user = userEvent.setup();
-    renderApp(["/movie/1"]);
+    window.location.hash = "#/movie/1";
+    render(
+      <HashRouter>
+        <AuthProvider>
+          <WatchlistProvider>
+            <App />
+          </WatchlistProvider>
+        </AuthProvider>
+      </HashRouter>,
+    );
 
     await user.click(screen.getByRole("button", { name: "Back to top" }));
 
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
     expect(screen.getByRole("heading", { name: /Test Movie/ })).toBeVisible();
+    expect(window.location.hash).toBe("#/movie/1");
     scrollTo.mockRestore();
   });
 
