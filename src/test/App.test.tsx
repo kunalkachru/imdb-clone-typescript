@@ -114,9 +114,11 @@ const renderApp = (initialEntries: string[] = ["/"]) =>
     </MemoryRouter>,
   );
 
-const expectSingleVisibleAttribution = () => {
+const expectSingleVisibleFooter = () => {
   expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+  expect(screen.getByText(`© ${new Date().getFullYear()} IMDb Clone`)).toBeVisible();
   expect(screen.getByText("Movie data from TMDB")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Back to top" })).toBeVisible();
 };
 
 describe("application route shell", () => {
@@ -126,7 +128,7 @@ describe("application route shell", () => {
 
     for (const route of configuredRoutes) {
       const { unmount } = renderApp([route]);
-      expectSingleVisibleAttribution();
+      expectSingleVisibleFooter();
       unmount();
     }
   });
@@ -137,19 +139,36 @@ describe("application route shell", () => {
     const user = userEvent.setup();
     renderApp();
 
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Actors" }));
     expect(screen.getByRole("heading", { name: "Popular Actors" })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Watchlist" }));
     expect(screen.getByRole("heading", { name: /My Watchlist/ })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
 
     await user.click(screen.getByRole("link", { name: "Home" }));
     expect(screen.getByRole("heading", { name: "🎬 Trending Movies" })).toBeVisible();
-    expectSingleVisibleAttribution();
+    expectSingleVisibleFooter();
+  });
+
+  it("AC-2: scrolls to the top without changing the URL or route", async () => {
+    localStorage.setItem("user", JSON.stringify(testUser));
+    localStorage.setItem("token", "test-token");
+    const user = userEvent.setup();
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const { unmount } = renderApp(["/actors"]);
+    const originalUrl = window.location.href;
+
+    await user.click(screen.getByRole("link", { name: "Back to top" }));
+
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+    expect(window.location.href).toBe(originalUrl);
+    expect(screen.getByRole("heading", { name: "Popular Actors" })).toBeVisible();
+    scrollTo.mockRestore();
+    unmount();
   });
 
   it("AC-8: resolves watchlist and movie links with HashRouter-compatible paths", async () => {
